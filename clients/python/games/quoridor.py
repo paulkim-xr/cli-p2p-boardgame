@@ -1,5 +1,6 @@
 from games.base import BaseGame
 from collections import deque
+from i18n import t
 
 SIZE = 9
 DIRS = {'N': (-1, 0), 'S': (1, 0), 'E': (0, 1), 'W': (0, -1)}
@@ -135,8 +136,11 @@ class Quoridor(BaseGame):
 
     def render(self, perspective=None):
         pid_syms = {p: str(i) for i, p in enumerate(self.players)}
-        walls_info = '  '.join(f'{p}:{self.walls_left[p]}벽' for p in self.players)
-        lines = [f'쿼리도 (Quoridor)  [{walls_info}]']
+        walls_info = '  '.join(
+            t('quoridor.walls_entry', player=p, n=self.walls_left[p])
+            for p in self.players
+        )
+        lines = [t('quoridor.title', walls=walls_info)]
         for r in range(SIZE):
             row = '  '
             for c in range(SIZE):

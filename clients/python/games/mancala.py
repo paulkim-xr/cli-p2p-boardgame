@@ -1,4 +1,5 @@
 from games.base import BaseGame
+from i18n import t
 
 PITS = 6
 SEEDS = 4
@@ -80,10 +81,10 @@ class Mancala(BaseGame):
         return False, None
 
     def render(self, perspective=None):
-        lines = ['만칼라 (Mancala)']
+        lines = [t('mancala.title')]
         for p in self.players:
-            lines.append(f'  {p}: {self.pits[p]}  저장소={self.store[p]}')
-        lines.append(f'  차례: {self.current_turn()}')
+            lines.append(t('mancala.player_row', player=p, pits=self.pits[p], store=self.store[p]))
+        lines.append(t('mancala.turn', player=self.current_turn()))
         return '\n'.join(lines)
 
     def get_state(self, perspective=None):

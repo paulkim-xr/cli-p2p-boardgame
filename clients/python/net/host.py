@@ -91,10 +91,12 @@ class Host:
         player_id = msg['from']
         move_data = msg.get('data', {})
         if self.game.current_turn() != player_id:
-            self._send_to(player_id, {'type': MsgType.ERROR, 'message': '당신의 차례가 아닙니다'})
+            from i18n import t
+            self._send_to(player_id, {'type': MsgType.ERROR, 'message': t('error.not_your_turn')})
             return
         if not self.game.validate_move(player_id, move_data):
-            self._send_to(player_id, {'type': MsgType.ERROR, 'message': '유효하지 않은 이동입니다'})
+            from i18n import t
+            self._send_to(player_id, {'type': MsgType.ERROR, 'message': t('error.invalid_move')})
             return
         self.game.apply_move(player_id, move_data)
         with self._lock:

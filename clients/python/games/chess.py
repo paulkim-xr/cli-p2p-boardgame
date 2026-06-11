@@ -1,4 +1,5 @@
 from games.base import BaseGame
+from i18n import t
 
 
 class Chess(BaseGame):
@@ -222,7 +223,7 @@ class Chess(BaseGame):
         return self._over, self._winner
 
     def render(self, perspective=None):
-        lines = ['체스 (Chess)', '  a b c d e f g h']
+        lines = [t('chess.title'), t('chess.board_header')]
         for rank in range(7, -1, -1):
             row = str(rank + 1) + ' '
             for file in range(8):
@@ -233,7 +234,7 @@ class Chess(BaseGame):
                 else:
                     row += '. '
             lines.append(row)
-        lines.append(f'  차례: {self.current_turn()}')
+        lines.append(t('chess.turn', player=self.current_turn()))
         return '\n'.join(lines)
 
     def get_state(self, perspective=None):

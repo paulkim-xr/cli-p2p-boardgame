@@ -1,5 +1,6 @@
 from games.base import BaseGame
 from typing import List, Optional
+from i18n import t
 
 
 class Nim(BaseGame):
@@ -40,10 +41,10 @@ class Nim(BaseGame):
         return False, None
 
     def render(self, perspective=None):
-        lines = ['님 (Nim)']
+        lines = [t('nim.title')]
         for i, p in enumerate(self.piles):
-            lines.append(f'  더미 {i}: {"I" * p} ({p})')
-        lines.append(f'  차례: {self.current_turn()}')
+            lines.append(t('nim.pile', i=i, bar='I' * p, count=p))
+        lines.append(t('nim.turn', player=self.current_turn()))
         return '\n'.join(lines)
 
     def get_state(self, perspective=None):

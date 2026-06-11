@@ -1,4 +1,5 @@
 from games.base import BaseGame
+from i18n import t
 
 SHIP_SIZES = [5, 4, 3, 3, 2]
 GRID = 10
@@ -96,9 +97,9 @@ class Battleship(BaseGame):
         if not perspective or perspective not in self.players:
             perspective = self.players[0] if self.players else None
         opp = next((p for p in self.players if p != perspective), None)
-        lines = [f'배틀십 (Battleship)  [{perspective}]']
+        lines = [t('battleship.title', player=perspective)]
         own_cells = {c for s in self._ships.get(perspective, []) for c in s}
-        lines.append('  내 보드:')
+        lines.append(t('battleship.own_board'))
         for r in range(GRID):
             row = '  '
             for c in range(GRID):
@@ -112,7 +113,7 @@ class Battleship(BaseGame):
                     row += '. '
             lines.append(row)
         if opp:
-            lines.append(f'  상대방 ({opp}):')
+            lines.append(t('battleship.enemy_board', opp=opp))
             for r in range(GRID):
                 row = '  '
                 for c in range(GRID):

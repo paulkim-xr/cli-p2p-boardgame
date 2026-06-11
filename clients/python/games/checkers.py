@@ -1,4 +1,5 @@
 from games.base import BaseGame
+from i18n import t
 
 
 class Checkers(BaseGame):
@@ -110,7 +111,7 @@ class Checkers(BaseGame):
     def render(self, perspective=None):
         syms = {None: '.', ('red', False): 'r', ('red', True): 'R',
                 ('black', False): 'b', ('black', True): 'B'}
-        lines = ['체커스 (Checkers)  r=빨강 R=빨강킹 b=검정 B=검정킹']
+        lines = [t('checkers.title')]
         for i, row in enumerate(self.board):
             lines.append(f'{i} ' + ' '.join(syms.get(c, '.') for c in row))
         return '\n'.join(lines)

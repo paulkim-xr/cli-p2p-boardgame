@@ -1,4 +1,5 @@
 from games.base import BaseGame
+from i18n import t
 
 
 class Go(BaseGame):
@@ -123,7 +124,7 @@ class Go(BaseGame):
         p0 = self.players[0] if self.players else 'black'
         p1 = self.players[1] if len(self.players) > 1 else 'white'
         syms = {None: '.', p0: 'B', p1: 'W'}
-        lines = [f'바둑 (Go) {self.size}x{self.size}  포획: {self._captures}']
+        lines = [t('go.title', size=self.size, captures=self._captures)]
         for row in self.board:
             lines.append(' '.join(syms.get(c, '.') for c in row))
         return '\n'.join(lines)

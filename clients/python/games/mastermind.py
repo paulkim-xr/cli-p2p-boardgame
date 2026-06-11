@@ -1,5 +1,6 @@
 from collections import Counter
 from games.base import BaseGame
+from i18n import t
 
 
 class Mastermind(BaseGame):
@@ -56,12 +57,11 @@ class Mastermind(BaseGame):
         return self._over, self._winner
 
     def render(self, perspective=None):
-        lines = ['마스터마인드 (숫자 4자리, 1-6)']
+        lines = [t('mastermind.title')]
         for i, (g, e, m) in enumerate(self._guesses):
-            lines.append(f'  {i+1:2}. {g}  정확={e} 위치오류={m}')
-        remaining = self.MAX_GUESSES - len(self._guesses)
+            lines.append(t('mastermind.guess', n=i + 1, guess=g, exact=e, mis=m))
         if not self._over:
-            lines.append(f'  남은 시도: {remaining}')
+            lines.append(t('mastermind.remaining', n=self.MAX_GUESSES - len(self._guesses)))
         return '\n'.join(lines)
 
     def get_state(self, perspective=None):

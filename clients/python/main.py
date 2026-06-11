@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""CLI P2P 보드게임 허브 — Python 클라이언트"""
+"""CLI P2P Board Game Hub — Python client"""
 
 import sys
 import threading
 import time
 
+import i18n
+from i18n import t
 from config import load_port
 from net.host import Host
 from net.client import Client
@@ -18,13 +20,17 @@ from ui.lobby_screen import show_lobby, prompt_host, prompt_join, prompt_chat, r
 
 def main():
     import argparse
-    ap = argparse.ArgumentParser(description='CLI P2P 보드게임 허브')
+    ap = argparse.ArgumentParser(description='CLI P2P Board Game Hub')
     ap.add_argument('--port', type=int, default=None)
     ap.add_argument('--name', default=None)
+    ap.add_argument('--lang', default='ko', choices=['ko', 'en'],
+                    help='UI language (default: ko)')
     args = ap.parse_args()
 
+    i18n.set_locale(args.lang)
+
     port = load_port(['--port', str(args.port)] if args.port else [])
-    name = args.name or input('이름을 입력하세요: ').strip() or '플레이어'
+    name = args.name or input(t('prompt.name')).strip() or t('prompt.default_name')
 
     chat_log = ChatLog()
     listener = Listener(port=port + 1)
@@ -108,20 +114,21 @@ def game_loop(name, client_obj, game_obj, players, chat_log, send_move, send_cha
             render_game(game_obj, players, chat_log.recent(3))
         else:
             clear()
-            header('게임 시작 대기 중...')
+            header(t('game.waiting'))
             time.sleep(0.5)
             continue
 
         if game_obj.is_over()[0]:
             _, winner = game_obj.is_over()
             clear()
-            header('게임 종료')
-            print(f'\n  승자: {BOLD}{winner}{RESET}\n')
-            input('  계속하려면 Enter를 누르세요...')
+            header(t('game.over'))
+            msg = t('game.winner', winner=winner) if winner else t('game.draw')
+            print(f'\n  {BOLD}{msg}{RESET}\n')
+            input('  ' + t('game.continue'))
             return
 
         if game_obj.current_turn() == name:
-            raw = input('이동> ').strip()
+            raw = input(t('game.move_prompt')).strip()
             if not raw:
                 continue
             if raw.lower() == 't':
@@ -133,7 +140,7 @@ def game_loop(name, client_obj, game_obj, players, chat_log, send_move, send_cha
         else:
             ch_check = _nonblocking_char()
             if ch_check == 't':
-                msg = input('채팅> ').strip()
+                msg = input(t('game.chat_prompt')).strip()
                 if msg:
                     send_chat(msg)
             time.sleep(0.2)
