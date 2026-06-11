@@ -99,12 +99,9 @@ def main():
                             players=[], max_players=max_players)
             beacon_thread = threading.Thread(target=beacon.run, daemon=True)
             beacon_thread.start()
-            host_thread = threading.Thread(target=host_obj.serve, daemon=True)
-            host_thread.start()
-            client_obj = Client(host='127.0.0.1', port=port,
-                                name=name, on_message=on_message)
-            client_thread = threading.Thread(target=client_obj.run, daemon=True)
-            client_thread.start()
+            host_obj.start()
+            client_obj = Client('127.0.0.1', port, name, on_message)
+            client_obj.connect()
             time.sleep(0.2)
             game_loop(name, client_obj, game_obj, players, chat_log,
                       send_move, send_chat)
@@ -115,10 +112,8 @@ def main():
             if not sid:
                 continue
             s = sessions[sid]
-            client_obj = Client(host=s.host_ip or s.host, port=s.port,
-                                name=name, on_message=on_message)
-            client_thread = threading.Thread(target=client_obj.run, daemon=True)
-            client_thread.start()
+            client_obj = Client(s.host_ip or s.host, s.port, name, on_message)
+            client_obj.connect()
             time.sleep(0.2)
             game_loop(name, client_obj, game_obj, players, chat_log,
                       send_move, send_chat)

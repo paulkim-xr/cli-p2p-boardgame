@@ -3,12 +3,17 @@ from net.protocol import encode, decode, MsgType
 
 
 class Client:
-    def __init__(self, host_ip, port, player_id):
+    def __init__(self, host_ip, port, player_id, on_message=None):
         self.host_ip = host_ip
         self.port = port
         self.player_id = player_id
-        self.on_message = None
+        self.on_message = on_message
         self._sock = None
+
+    def run(self):
+        self.connect()
+        while self._sock:
+            threading.Event().wait(0.1)
 
     def connect(self):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

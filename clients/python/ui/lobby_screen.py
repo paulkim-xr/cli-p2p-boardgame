@@ -34,7 +34,7 @@ def prompt_host(my_name):
         game = game_list[int(choice) - 1]
     except (ValueError, IndexError):
         return None, None
-    max_p = GAMES[game].max_players
+    max_p = GAMES[game].get('max', 2)
     raw = input(f'Max players (2-{max_p}): ').strip()
     try:
         n = min(max(2, int(raw)), max_p)

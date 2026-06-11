@@ -1,6 +1,27 @@
 from dataclasses import dataclass, field
 from typing import List
 
+
+def _load_game_classes():
+    from games.nim import Nim
+    from games.mastermind import Mastermind
+    from games.connect_four import ConnectFour
+    from games.othello import Othello
+    from games.checkers import Checkers
+    from games.chess import Chess
+    from games.battleship import Battleship
+    from games.go import Go
+    from games.hex_game import Hex
+    from games.quoridor import Quoridor
+    from games.mancala import Mancala
+    return {
+        'nim': Nim, 'mastermind': Mastermind, 'connect4': ConnectFour,
+        'othello': Othello, 'checkers': Checkers, 'chess': Chess,
+        'battleship': Battleship, 'go': Go, 'hex': Hex,
+        'quoridor': Quoridor, 'mancala': Mancala,
+    }
+
+
 GAMES = {
     'nim':        {'name': 'Nim',          'min': 2, 'max': 6},
     'mastermind': {'name': 'Mastermind',   'min': 2, 'max': 2},

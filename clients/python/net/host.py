@@ -3,10 +3,12 @@ from net.protocol import encode, decode, MsgType
 
 
 class Host:
-    def __init__(self, port, game, session_name):
+    def __init__(self, port, game=None, session_name='', game_name=None, max_players=2):
         self.port = port
         self.game = game
-        self.session_name = session_name
+        self.session_name = session_name or game_name or ''
+        self._game_name = game_name
+        self._max_players = max_players
         self.clients = {}   # player_id -> socket
         self._lock = threading.Lock()
         self._server = None
@@ -20,6 +22,11 @@ class Host:
         self._server.settimeout(1.0)
         self._running = True
         threading.Thread(target=self._accept_loop, daemon=True).start()
+
+    def serve(self):
+        self.start()
+        while self._running:
+            threading.Event().wait(0.1)
 
     def stop(self):
         self._running = False
@@ -51,8 +58,18 @@ class Host:
                     player_id = msg['from']
                     with self._lock:
                         self.clients[player_id] = conn
-                    self.broadcast({'type': MsgType.PLAYER_LIST,
-                                    'players': list(self.clients.keys())})
+                    players_now = list(self.clients.keys())
+                    self.broadcast({'type': MsgType.PLAYER_LIST, 'players': players_now})
+                    if (self.game is None and self._game_name and
+                            len(players_now) >= self._max_players):
+                        from lobby.session import _load_game_classes
+                        classes = _load_game_classes()
+                        if self._game_name in classes:
+                            self.game = classes[self._game_name]()
+                            self.game.start(players_now)
+                            self.broadcast({'type': MsgType.GAME_START,
+                                            'game': self._game_name,
+                                            'players': players_now})
                 elif t == MsgType.MOVE:
                     self._handle_move(msg)
                 elif t == MsgType.CHAT:
