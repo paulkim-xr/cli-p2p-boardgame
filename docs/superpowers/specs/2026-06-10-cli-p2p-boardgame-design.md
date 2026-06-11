@@ -1,24 +1,27 @@
 # CLI P2P Board Game Hub — Design Spec
 
-**Date:** 2026-06-10  
+**Date:** 2026-06-10
+**Updated:** 2026-06-11
 **Status:** Approved
 
 ---
 
 ## Overview
 
-A Python CLI application that lets coworkers on the same LAN play classic board games against each other in a multiplayer P2P fashion. The UI is intentionally designed to look like terminal/work output so it passes a casual glance at your screen. No external dependencies — pure Python stdlib only.
+A multi-client CLI platform that lets coworkers on the same LAN play classic board games in a multiplayer P2P fashion. Four client implementations share one wire protocol — Python, Node.js, Bun.js, and a Windows standalone `.exe` (compiled from the Bun client). Any client can host or join any other client's session. The UI is intentionally designed to look like terminal/work output. No external runtime dependencies per client.
 
 ---
 
 ## Goals
 
-- Clone and run with zero setup (`python main.py`)
+- Clone and run with zero setup per client
 - LAN session discovery with no IP addresses to share
+- Cross-client interoperability — Python host, Node.js joiner, Bun joiner all in the same game
 - 10+ classic board games
 - In-game + lobby chat
 - UI that looks like work (monochrome, log-like, boss key)
 - Configurable port to avoid conflicts with dev tools
+- Windows standalone `.exe` — no runtime needed, single file download
 
 ---
 
@@ -28,13 +31,15 @@ A Python CLI application that lets coworkers on the same LAN play classic board 
 
 One player hosts a session. All other players connect to the host via TCP. The host validates and relays all messages (moves, chat, state updates) to every connected client. This supports 2–6 players depending on the game, with no mesh complexity.
 
+The host peer runs both the TCP server and the game state authority. Any client implementation (Python, Node.js, Bun) can be the host.
+
 ```
         ┌──────────┐
-        │   HOST   │  ← owns game state authority
+        │   HOST   │  ← owns game state authority (any client impl)
         └────┬─────┘
       ┌──────┼──────┐
   ┌───▼──┐ ┌─▼───┐ ┌▼────┐
-  │ P2   │ │ P3  │ │ P4  │  ← TCP clients
+  │ P2   │ │ P3  │ │ P4  │  ← TCP clients (any client impl)
   └──────┘ └─────┘ └─────┘
 ```
 
@@ -48,6 +53,101 @@ One player hosts a session. All other players connect to the host via TCP. The h
 
 ---
 
+## Client Implementations
+
+Four clients, one protocol. Each is fully self-contained — can host or join.
+
+| Client | Runtime requirement | How to run | Notes |
+|---|---|---|---|
+| Python | Python 3.8+, stdlib only | `python main.py` | Most likely pre-installed |
+| Node.js | Node.js 18+ | `node main.js` | No npm install needed (stdlib only) |
+| Bun.js | Bun 1.0+ | `bun main.ts` | Fastest startup, TypeScript native |
+| Windows `.exe` | None | `gamehub.exe` | Compiled from Bun client via `bun build --compile` |
+
+Cross-client play is fully supported: a Python host can have a Node.js player and a Bun player in the same session. The protocol is the contract.
+
+### Project Structure
+
+```
+p2p-cli-games/
+├── protocol/                    # language-agnostic wire protocol spec
+│   └── messages.md              # canonical message type definitions
+├── clients/
+│   ├── python/
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   ├── net/
+│   │   │   ├── host.py          # TCP server + relay
+│   │   │   ├── client.py        # TCP client
+│   │   │   └── protocol.py      # message encode/decode
+│   │   ├── lobby/
+│   │   │   ├── discovery.py     # UDP beacon + listener
+│   │   │   └── session.py
+│   │   ├── games/
+│   │   │   ├── base.py
+│   │   │   ├── chess.py
+│   │   │   ├── checkers.py
+│   │   │   ├── battleship.py
+│   │   │   ├── mastermind.py
+│   │   │   ├── nim.py
+│   │   │   ├── mancala.py
+│   │   │   ├── go.py
+│   │   │   ├── quoridor.py
+│   │   │   ├── hex.py
+│   │   │   ├── connect_four.py
+│   │   │   └── othello.py
+│   │   ├── ui/
+│   │   │   ├── terminal.py
+│   │   │   ├── lobby_screen.py
+│   │   │   └── boss_key.py
+│   │   └── chat.py
+│   ├── nodejs/
+│   │   ├── main.js
+│   │   ├── config.js
+│   │   ├── net/
+│   │   │   ├── host.js
+│   │   │   ├── client.js
+│   │   │   └── protocol.js
+│   │   ├── lobby/
+│   │   │   ├── discovery.js
+│   │   │   └── session.js
+│   │   ├── games/
+│   │   │   └── (same 11 games as .js files)
+│   │   ├── ui/
+│   │   │   ├── terminal.js
+│   │   │   ├── lobby_screen.js
+│   │   │   └── boss_key.js
+│   │   └── chat.js
+│   └── bun/
+│       ├── main.ts
+│       ├── config.ts
+│       ├── net/
+│       │   ├── host.ts
+│       │   ├── client.ts
+│       │   └── protocol.ts
+│       ├── lobby/
+│       │   ├── discovery.ts
+│       │   └── session.ts
+│       ├── games/
+│       │   └── (same 11 games as .ts files)
+│       ├── ui/
+│       │   ├── terminal.ts
+│       │   ├── lobby_screen.ts
+│       │   └── boss_key.ts
+│       └── chat.ts
+└── dist/
+    └── gamehub.exe              # compiled via: bun build --compile clients/bun/main.ts
+```
+
+### Build Order
+
+1. **Python client** — reference implementation. Establishes all game logic and protocol behavior.
+2. **Bun client** — port from Python. TypeScript gives type safety for the protocol types.
+3. **Windows `.exe`** — `bun build --compile clients/bun/main.ts --outfile dist/gamehub.exe` (no extra work).
+4. **Node.js client** — port from Bun. Mostly `.ts` → `.js` with minor API differences (dgram vs Bun.udpSocket etc).
+
+---
+
 ## Port Configuration
 
 Single port number controls both channels:
@@ -57,16 +157,18 @@ Single port number controls both channels:
 **Default: `47777`** — above the noisy dev range (3000–18080), not used by any common service or tool.
 
 Priority order (highest to lowest):
-1. CLI flag: `python main.py --port 55555`
-2. Environment variable: `PORT=55555 python main.py`
+1. CLI flag: `--port 55555`
+2. Environment variable: `PORT=55555`
 3. Config file: `config.json` → `{ "port": 55555 }`
 4. Default: `47777`
+
+Applies identically across all four clients.
 
 ---
 
 ## Message Protocol
 
-Plain JSON lines over TCP. Each message is a single line terminated by `\n`.
+Plain JSON lines over TCP. Each message is a single line terminated by `\n`. Defined canonically in `protocol/messages.md`.
 
 | Type | Direction | Fields |
 |---|---|---|
@@ -81,41 +183,6 @@ Plain JSON lines over TCP. Each message is a single line terminated by `\n`.
 | `ERROR` | host → client | `message` |
 
 Host broadcasts all messages to every connected client after validation.
-
----
-
-## Project Structure
-
-```
-p2p-cli-games/
-├── main.py                  # entry: host | join | config
-├── config.py                # port config (flag > env > file > default)
-├── net/
-│   ├── host.py              # TCP server, relay, game state authority
-│   ├── client.py            # TCP client
-│   └── protocol.py          # message types, JSON encode/decode
-├── lobby/
-│   ├── discovery.py         # UDP beacon + listener
-│   └── session.py           # session metadata
-├── games/
-│   ├── base.py              # abstract: validate_move(), apply_move(), render(), is_over(), min/max players
-│   ├── chess.py
-│   ├── checkers.py
-│   ├── battleship.py
-│   ├── mastermind.py
-│   ├── nim.py
-│   ├── mancala.py
-│   ├── go.py
-│   ├── quoridor.py
-│   ├── hex.py
-│   ├── connect_four.py
-│   └── othello.py
-├── ui/
-│   ├── terminal.py          # curses rendering, input loop
-│   ├── lobby_screen.py      # session list + create/join
-│   └── boss_key.py          # ESC → fake pytest/log overlay
-└── chat.py                  # chat panel (T to open input, right-side column)
-```
 
 ---
 
@@ -135,19 +202,18 @@ p2p-cli-games/
 | Nim | 2 | 6 | |
 | Mancala | 2 | 4 | |
 
-### Game Interface (`games/base.py`)
+### Game Interface
 
-Every game implements:
-```python
-class BaseGame:
-    min_players: int
-    max_players: int
+Every game in every client implements the same logical interface:
 
-    def validate_move(self, player_id, move_data) -> bool: ...
-    def apply_move(self, player_id, move_data) -> None: ...
-    def render(self, perspective: str) -> str: ...  # perspective = player_id for hidden-state games
-    def is_over(self) -> tuple[bool, str | None]: ...  # (done, winner_id)
-    def current_turn(self) -> str: ...  # player_id whose turn it is
+```
+validate_move(player_id, move_data) → bool
+apply_move(player_id, move_data) → void
+render(perspective) → string       # perspective = player_id for hidden-state games
+is_over() → (done: bool, winner: string | null)
+current_turn() → string            # player_id whose turn it is
+min_players: int
+max_players: int
 ```
 
 ---
@@ -177,20 +243,33 @@ class BaseGame:
 - **Host disconnects:** all clients display `[connection lost]` and return to lobby screen
 - **Client disconnects mid-game:** host broadcasts `LEAVE`, game ends or pauses depending on game rules
 - **Invalid move:** host rejects with `ERROR` message, client re-prompts
-- **Port in use:** startup prints a clear message: `Port 47777 is in use. Try: python main.py --port 55555`
+- **Port in use:** startup prints a clear message with a suggested alternative port
 - **No sessions found:** lobby shows `Listening for sessions on LAN... (none yet)` and keeps polling
 
 ---
 
 ## Running
 
+**Python**
 ```bash
-git clone <repo>
-cd p2p-cli-games
-python main.py          # interactive: pick host or join
-python main.py host     # immediately go to host flow
-python main.py join     # immediately go to join flow
-python main.py --port 55555 host
+git clone <repo> && cd p2p-cli-games/clients/python
+python main.py [host|join] [--port N]
 ```
 
-No pip install. No virtualenv. Python 3.8+ required (stdlib only).
+**Node.js**
+```bash
+cd p2p-cli-games/clients/nodejs
+node main.js [host|join] [--port N]
+```
+
+**Bun**
+```bash
+cd p2p-cli-games/clients/bun
+bun main.ts [host|join] [--port N]
+```
+
+**Windows standalone**
+```
+gamehub.exe [host|join] [--port N]
+```
+Built via: `bun build --compile clients/bun/main.ts --outfile dist/gamehub.exe`
