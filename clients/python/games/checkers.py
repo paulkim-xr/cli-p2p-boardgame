@@ -110,7 +110,7 @@ class Checkers(BaseGame):
     def render(self, perspective=None):
         syms = {None: '.', ('red', False): 'r', ('red', True): 'R',
                 ('black', False): 'b', ('black', True): 'B'}
-        lines = ['Checkers']
+        lines = ['체커스 (Checkers)  r=빨강 R=빨강킹 b=검정 B=검정킹']
         for i, row in enumerate(self.board):
             lines.append(f'{i} ' + ' '.join(syms.get(c, '.') for c in row))
         return '\n'.join(lines)

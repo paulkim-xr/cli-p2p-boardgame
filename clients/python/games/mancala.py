@@ -80,10 +80,10 @@ class Mancala(BaseGame):
         return False, None
 
     def render(self, perspective=None):
-        lines = ['Mancala']
+        lines = ['만칼라 (Mancala)']
         for p in self.players:
-            lines.append(f'  {p}: {self.pits[p]}  store={self.store[p]}')
-        lines.append(f'  turn: {self.current_turn()}')
+            lines.append(f'  {p}: {self.pits[p]}  저장소={self.store[p]}')
+        lines.append(f'  차례: {self.current_turn()}')
         return '\n'.join(lines)
 
     def get_state(self, perspective=None):

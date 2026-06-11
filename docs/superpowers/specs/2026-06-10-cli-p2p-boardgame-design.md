@@ -8,7 +8,7 @@
 
 ## Overview
 
-A multi-client CLI platform that lets coworkers on the same LAN play classic board games in a multiplayer P2P fashion. Four client implementations share one wire protocol — Python, Node.js, Bun.js, and a Windows standalone `.exe` (compiled from the Bun client). Any client can host or join any other client's session. The UI is intentionally designed to look like terminal/work output. No external runtime dependencies per client.
+A multi-client CLI platform that lets coworkers on the same LAN play classic board games in a multiplayer P2P fashion. Four client implementations share one wire protocol — Python, Node.js, Bun.js, and a Windows standalone `.exe` (compiled from the Bun client). Any client can host or join any other client's session. No external runtime dependencies per client.
 
 ---
 
@@ -19,7 +19,7 @@ A multi-client CLI platform that lets coworkers on the same LAN play classic boa
 - Cross-client interoperability — Python host, Node.js joiner, Bun joiner all in the same game
 - 10+ classic board games
 - In-game + lobby chat
-- UI that looks like work (monochrome, log-like, boss key)
+- Clean terminal UI with Korean language support
 - Configurable port to avoid conflicts with dev tools
 - Windows standalone `.exe` — no runtime needed, single file download
 
@@ -218,16 +218,11 @@ max_players: int
 
 ---
 
-## UI & Work Disguise
+## UI
 
-- **Monochrome by default** — no colors, no emoji, no ASCII art banners
-- **Board renders as a plain grid** — looks like a data table or matrix output
-- **Status line** reads like a log: `[47777] session: alpha | game: chess | turn: dan | move: 14`
-- **Chat panel** occupies the right ~30 columns, renders as a scrolling log tail
-- **Boss key** — press `ESC` at any time:
-  - Instantly replaces the entire screen with fake scrolling pytest/log output
-  - Game state is preserved in memory
-  - Press `ESC` again to return to the game
+- **터미널 UI** — ANSI 색상, 한국어 지원
+- **보드는 간결한 그리드로 렌더링**
+- **상태 표시줄**: `[47777] 세션: alpha | 게임: chess | 차례: dan`
 
 ### Chat
 

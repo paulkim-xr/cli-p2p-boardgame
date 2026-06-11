@@ -61,7 +61,7 @@ class ConnectFour(BaseGame):
             syms[self.players[0]] = 'X'
             if len(self.players) > 1:
                 syms[self.players[1]] = 'O'
-        lines = ['Connect Four']
+        lines = ['커넥트 포 (Connect Four)']
         for row in self.board:
             lines.append('  ' + ' '.join(syms.get(c, '?') for c in row))
         lines.append('  ' + ' '.join(str(i) for i in range(COLS)))

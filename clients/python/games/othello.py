@@ -85,7 +85,7 @@ class Othello(BaseGame):
         p0 = self.players[0] if self.players else 'black'
         p1 = self.players[1] if len(self.players) > 1 else 'white'
         syms = {None: '.', p0: 'B', p1: 'W'}
-        lines = ['Othello']
+        lines = ['오델로 (Othello)']
         lines.append('  ' + ' '.join(str(i) for i in range(SIZE)))
         for i, row in enumerate(self.board):
             lines.append(f'{i} ' + ' '.join(syms.get(c, '.') for c in row))

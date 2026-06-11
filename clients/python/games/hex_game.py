@@ -71,7 +71,7 @@ class Hex(BaseGame):
         p0 = self.players[0] if self.players else 'black'
         p1 = self.players[1] if len(self.players) > 1 else 'white'
         syms = {None: '.', p0: 'B', p1: 'W'}
-        lines = ['Hex 11x11  (B:top-bottom  W:left-right)']
+        lines = ['헥스 (Hex) 11x11  (B:위아래  W:좌우)']
         for i, row in enumerate(self.board):
             lines.append(' ' * i + ' '.join(syms.get(c, '.') for c in row))
         return '\n'.join(lines)

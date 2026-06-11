@@ -135,7 +135,8 @@ class Quoridor(BaseGame):
 
     def render(self, perspective=None):
         pid_syms = {p: str(i) for i, p in enumerate(self.players)}
-        lines = ['Quoridor']
+        walls_info = '  '.join(f'{p}:{self.walls_left[p]}벽' for p in self.players)
+        lines = [f'쿼리도 (Quoridor)  [{walls_info}]']
         for r in range(SIZE):
             row = '  '
             for c in range(SIZE):

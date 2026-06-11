@@ -1,41 +1,42 @@
 from lobby.session import GAMES
-from ui.terminal import header, menu, hr, BOLD, RESET, DIM, CYAN, GREEN, YELLOW
+from ui.terminal import header, hr, BOLD, RESET, DIM, CYAN, GREEN, YELLOW
 
 
 def show_lobby(sessions, my_name, chat_log):
-    header('p2p game hub')
+    header('P2P 보드게임 허브')
     print()
     if sessions:
-        print(BOLD + '  Active Sessions' + RESET)
+        print(BOLD + '  진행 중인 세션' + RESET)
         for i, (sid, s) in enumerate(sessions.items(), 1):
-            player_str = ','.join(s.players)
-            print(f'  {DIM}[{i}]{RESET} {CYAN}{s.game}{RESET} — host={s.host}  players=[{player_str}]  port={s.port}')
+            player_str = ', '.join(s.players)
+            print(f'  {DIM}[{i}]{RESET} {CYAN}{s.game}{RESET} — 호스트={s.host}  플레이어=[{player_str}]  포트={s.port}')
     else:
-        print(DIM + '  No sessions found on LAN' + RESET)
+        print(DIM + '  LAN에서 세션을 찾을 수 없습니다' + RESET)
     print()
     hr()
     if chat_log:
-        print(BOLD + '  Chat' + RESET)
+        print(BOLD + '  채팅' + RESET)
         for entry in chat_log[-5:]:
             print(f'  {DIM}{entry["from"]}{RESET}: {entry["text"]}')
     print()
-    print(f'  {DIM}[H]{RESET} Host a game    {DIM}[J]{RESET} Join by number    {DIM}[T]{RESET} Chat    {DIM}[ESC]{RESET} Boss key')
+    print(f'  {DIM}[H]{RESET} 게임 호스트    {DIM}[J]{RESET} 번호로 참가    {DIM}[T]{RESET} 채팅    {DIM}[Q]{RESET} 종료')
     print()
 
 
 def prompt_host(my_name):
     print()
-    print(BOLD + 'Available games:' + RESET)
+    print(BOLD + '게임 목록:' + RESET)
     game_list = sorted(GAMES.keys())
     for i, g in enumerate(game_list, 1):
-        print(f'  {DIM}[{i}]{RESET} {g}')
-    choice = input('Pick game number: ').strip()
+        info = GAMES[g]
+        print(f'  {DIM}[{i}]{RESET} {info["name"]}  ({info["min"]}~{info["max"]}명)')
+    choice = input('게임 번호를 선택하세요: ').strip()
     try:
         game = game_list[int(choice) - 1]
     except (ValueError, IndexError):
         return None, None
     max_p = GAMES[game].get('max', 2)
-    raw = input(f'Max players (2-{max_p}): ').strip()
+    raw = input(f'최대 플레이어 수 (2~{max_p}): ').strip()
     try:
         n = min(max(2, int(raw)), max_p)
     except ValueError:
@@ -45,7 +46,7 @@ def prompt_host(my_name):
 
 def prompt_join(sessions):
     keys = list(sessions.keys())
-    raw = input('Session number: ').strip()
+    raw = input('세션 번호를 입력하세요: ').strip()
     try:
         return keys[int(raw) - 1]
     except (ValueError, IndexError):
@@ -53,20 +54,20 @@ def prompt_join(sessions):
 
 
 def prompt_chat(my_name):
-    msg = input(f'{YELLOW}{my_name}{RESET}> ').strip()
+    msg = input(f'{YELLOW}{my_name}{RESET} 채팅> ').strip()
     return msg or None
 
 
 def render_game(game_obj, players, chat_log):
-    header('in game')
+    header('게임 중')
     print()
     print(game_obj.render())
     print()
     hr()
     if chat_log:
-        print(BOLD + '  Chat' + RESET)
+        print(BOLD + '  채팅' + RESET)
         for entry in chat_log[-3:]:
             print(f'  {DIM}{entry["from"]}{RESET}: {entry["text"]}')
     print()
-    print(f'  {GREEN}Your move{RESET}   {DIM}[T]{RESET} chat   {DIM}[ESC]{RESET} boss key')
+    print(f'  {GREEN}내 차례{RESET}   {DIM}[T]{RESET} 채팅')
     print()

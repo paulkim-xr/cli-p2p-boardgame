@@ -40,10 +40,10 @@ class Nim(BaseGame):
         return False, None
 
     def render(self, perspective=None):
-        lines = ['Nim']
+        lines = ['님 (Nim)']
         for i, p in enumerate(self.piles):
-            lines.append(f'  pile {i}: {"I" * p} ({p})')
-        lines.append(f'  turn: {self.current_turn()}')
+            lines.append(f'  더미 {i}: {"I" * p} ({p})')
+        lines.append(f'  차례: {self.current_turn()}')
         return '\n'.join(lines)
 
     def get_state(self, perspective=None):

@@ -96,9 +96,9 @@ class Battleship(BaseGame):
         if not perspective or perspective not in self.players:
             perspective = self.players[0] if self.players else None
         opp = next((p for p in self.players if p != perspective), None)
-        lines = [f'Battleship  [{perspective}]']
+        lines = [f'배틀십 (Battleship)  [{perspective}]']
         own_cells = {c for s in self._ships.get(perspective, []) for c in s}
-        lines.append('  Own board:')
+        lines.append('  내 보드:')
         for r in range(GRID):
             row = '  '
             for c in range(GRID):
@@ -112,7 +112,7 @@ class Battleship(BaseGame):
                     row += '. '
             lines.append(row)
         if opp:
-            lines.append(f'  Enemy ({opp}):')
+            lines.append(f'  상대방 ({opp}):')
             for r in range(GRID):
                 row = '  '
                 for c in range(GRID):
