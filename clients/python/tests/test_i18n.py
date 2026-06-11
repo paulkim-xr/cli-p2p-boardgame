@@ -1,4 +1,5 @@
 import sys
+import os
 sys.path.insert(0, 'clients/python')
 import i18n
 
@@ -49,3 +50,40 @@ def test_nim_render_english():
     out = g.render()
     assert 'Nim' in out
     assert 'pile' in out
+
+
+def test_detect_locale_returns_supported():
+    result = i18n.detect_locale()
+    assert result in i18n._supported_locales()
+
+
+def test_detect_from_lang_env(monkeypatch):
+    monkeypatch.setenv('LANG', 'ko_KR.UTF-8')
+    monkeypatch.delenv('LANGUAGE', raising=False)
+    monkeypatch.delenv('LC_ALL', raising=False)
+    monkeypatch.delenv('LC_MESSAGES', raising=False)
+    assert i18n.detect_locale() == 'ko'
+
+
+def test_detect_english_from_lang_env(monkeypatch):
+    monkeypatch.setenv('LANG', 'en_US.UTF-8')
+    monkeypatch.delenv('LANGUAGE', raising=False)
+    monkeypatch.delenv('LC_ALL', raising=False)
+    monkeypatch.delenv('LC_MESSAGES', raising=False)
+    assert i18n.detect_locale() == 'en'
+
+
+def test_detect_language_env_list(monkeypatch):
+    monkeypatch.setenv('LANGUAGE', 'ko_KR:en_US')
+    assert i18n.detect_locale() == 'ko'
+
+
+def test_detect_unknown_falls_back_to_en(monkeypatch):
+    for var in ('LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG'):
+        monkeypatch.delenv(var, raising=False)
+    # Patch getdefaultlocale to return unknown language
+    import locale as _lc
+    monkeypatch.setattr(_lc, 'getdefaultlocale', lambda: ('xx_XX', 'UTF-8'))
+    # On non-Windows, should fall back to 'en'
+    if sys.platform != 'win32':
+        assert i18n.detect_locale() == 'en'

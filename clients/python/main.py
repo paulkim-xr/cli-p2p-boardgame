@@ -23,11 +23,13 @@ def main():
     ap = argparse.ArgumentParser(description='CLI P2P Board Game Hub')
     ap.add_argument('--port', type=int, default=None)
     ap.add_argument('--name', default=None)
-    ap.add_argument('--lang', default='ko', choices=['ko', 'en'],
-                    help='UI language (default: ko)')
+    ap.add_argument('--lang', default=None, choices=['ko', 'en'],
+                    help='UI language (auto-detected from system if not set)')
     args = ap.parse_args()
 
-    i18n.set_locale(args.lang)
+    if args.lang:
+        i18n.set_locale(args.lang)
+    # else: already auto-detected at i18n import time
 
     port = load_port(['--port', str(args.port)] if args.port else [])
     name = args.name or input(t('prompt.name')).strip() or t('prompt.default_name')
