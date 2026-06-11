@@ -1,0 +1,263 @@
+﻿TAP version 13
+# Subtest: start in placement phase
+ok 1 - start in placement phase
+  ---
+  duration_ms: 1.5045
+  type: 'test'
+  ...
+# Subtest: place all ships transitions to battle
+ok 2 - place all ships transitions to battle
+  ---
+  duration_ms: 0.3933
+  type: 'test'
+  ...
+# Subtest: shot hit and miss
+ok 3 - shot hit and miss
+  ---
+  duration_ms: 0.2612
+  type: 'test'
+  ...
+# Subtest: all sunk — game over
+ok 4 - all sunk — game over
+  ---
+  duration_ms: 0.3483
+  type: 'test'
+  ...
+# Subtest: duplicate shot rejected
+ok 5 - duplicate shot rejected
+  ---
+  duration_ms: 0.3539
+  type: 'test'
+  ...
+# Subtest: initial board has pieces
+ok 6 - initial board has pieces
+  ---
+  duration_ms: 1.074
+  type: 'test'
+  ...
+# Subtest: red moves first
+ok 7 - red moves first
+  ---
+  duration_ms: 0.161
+  type: 'test'
+  ...
+# Subtest: valid move accepted
+ok 8 - valid move accepted
+  ---
+  duration_ms: 0.5973
+  type: 'test'
+  ...
+# Subtest: invalid move rejected (wrong player)
+ok 9 - invalid move rejected (wrong player)
+  ---
+  duration_ms: 0.1805
+  type: 'test'
+  ...
+# Subtest: king promotion on reaching far row
+ok 10 - king promotion on reaching far row
+  ---
+  duration_ms: 0.2481
+  type: 'test'
+  ...
+# Subtest: render shows pieces
+ok 11 - render shows pieces
+  ---
+  duration_ms: 0.2623
+  type: 'test'
+  ...
+# Subtest: initial position has 32 pieces
+ok 12 - initial position has 32 pieces
+  ---
+  duration_ms: 0.9714
+  type: 'test'
+  ...
+# Subtest: start sets color map
+ok 13 - start sets color map
+  ---
+  duration_ms: 0.1798
+  type: 'test'
+  ...
+# Subtest: pawn can move forward
+ok 14 - pawn can move forward
+  ---
+  duration_ms: 1.0116
+  type: 'test'
+  ...
+# Subtest: invalid move rejected
+ok 15 - invalid move rejected
+  ---
+  duration_ms: 0.1502
+  type: 'test'
+  ...
+# Subtest: wrong color rejected
+ok 16 - wrong color rejected
+  ---
+  duration_ms: 0.1279
+  type: 'test'
+  ...
+# Subtest: scholar mate
+ok 17 - scholar mate
+  ---
+  duration_ms: 8.2595
+  type: 'test'
+  ...
+# Subtest: render shows board
+ok 18 - render shows board
+  ---
+  duration_ms: 0.5423
+  type: 'test'
+  ...
+# Subtest: default port when no args
+ok 19 - default port when no args
+  ---
+  duration_ms: 1.0308
+  type: 'test'
+  ...
+# Subtest: --port flag overrides default
+ok 20 - --port flag overrides default
+  ---
+  duration_ms: 0.1406
+  type: 'test'
+  ...
+# Subtest: PORT env var
+ok 21 - PORT env var
+  ---
+  duration_ms: 0.1853
+  type: 'test'
+  ...
+# Subtest: basic move and turn switch
+ok 22 - basic move and turn switch
+  ---
+  duration_ms: 1.9059
+  type: 'test'
+  ...
+# Subtest: invalid col rejected
+ok 23 - invalid col rejected
+  ---
+  duration_ms: 0.1626
+  type: 'test'
+  ...
+# Subtest: full column rejected
+ok 24 - full column rejected
+  ---
+  duration_ms: 0.1945
+  type: 'test'
+  ...
+# Subtest: win detection horizontal
+ok 25 - win detection horizontal
+  ---
+  duration_ms: 0.1714
+  type: 'test'
+  ...
+# Subtest: win detection vertical
+ok 26 - win detection vertical
+  ---
+  duration_ms: 0.1648
+  type: 'test'
+  ...
+# Subtest: render shows board
+ok 27 - render shows board
+  ---
+  duration_ms: 0.2428
+  type: 'test'
+  ...
+# Subtest: start initializes captures
+ok 28 - start initializes captures
+  ---
+  duration_ms: 1.0793
+  type: 'test'
+  ...
+# Subtest: valid placement
+ok 29 - valid placement
+  ---
+  duration_ms: 0.7283
+  type: 'test'
+  ...
+# Subtest: occupied cell rejected
+ok 30 - occupied cell rejected
+  ---
+  duration_ms: 0.2072
+  type: 'test'
+  ...
+# Subtest: capture removes opponent stones
+ok 31 - capture removes opponent stones
+  ---
+  duration_ms: 0.3275
+  type: 'test'
+  ...
+# Subtest: two passes ends game
+ok 32 - two passes ends game
+  ---
+  duration_ms: 0.2403
+  type: 'test'
+  ...
+# Subtest: pass move valid
+ok 33 - pass move valid
+  ---
+  duration_ms: 0.1199
+  type: 'test'
+  ...
+# Subtest: render contains board
+ok 34 - render contains board
+  ---
+  duration_ms: 0.3086
+  type: 'test'
+  ...
+# Subtest: valid placement
+ok 35 - valid placement
+  ---
+  duration_ms: 1.8071
+  type: 'test'
+  ...
+# Subtest: occupied cell rejected
+ok 36 - occupied cell rejected
+  ---
+  duration_ms: 0.3191
+  type: 'test'
+  ...
+# Subtest: alice wins top-bottom
+ok 37 - alice wins top-bottom
+  ---
+  duration_ms: 0.4029
+  type: 'test'
+  ...
+# Subtest: render has hex shape
+ok 38 - render has hex shape
+  ---
+  duration_ms: 0.2599
+  type: 'test'
+  ...
+# Subtest: host starts and accepts client
+ok 39 - host starts and accepts client
+  ---
+  duration_ms: 121.1836
+  type: 'test'
+  ...
+# Subtest: two clients trigger game start
+not ok 40 - two clients trigger game start
+  ---
+  duration_ms: 1540.9701
+  type: 'test'
+  location: 'C:\\Users\\PC\\Documents\\Rathon\\vibecode\\g\\clients\\node\\tests\\test_host_client.test.js:34:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(a_msgs.some(m => m.type === MsgType.GAME_START))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (C:\Users\PC\Documents\Rathon\vibecode\g\clients\node\tests\test_host_client.test.js:46:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: chat is relayed to all clients
+ok 41 - chat is relayed to all clients
+  ---
+  duration_ms: 319.0887
+  type: 'test'
+  ...
