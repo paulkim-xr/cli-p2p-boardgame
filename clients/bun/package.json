@@ -1,0 +1,16 @@
+{
+  "name": "cli-p2p-boardgame-bun",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "test": "bun test",
+    "build": "bun build --compile src/main.ts --outfile dist/game-hub",
+    "build:win": "bun build --compile --target=bun-windows-x64 src/main.ts --outfile dist/game-hub.exe"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
