@@ -1,0 +1,66 @@
+{
+  "app.description": "CLI P2P Board Game Hub",
+  "prompt.name": "Your name: ",
+  "prompt.default_name": "player",
+
+  "lobby.title": "P2P Board Game Hub",
+  "lobby.sessions_header": "Active Sessions",
+  "lobby.no_sessions": "No sessions found on LAN",
+  "lobby.session_row": "[{i}] {game} — host={host}  players=[{players}]  port={port}",
+  "lobby.chat_header": "Chat",
+  "lobby.menu": "[H] Host a game    [J] Join by number    [T] Chat    [Q] Quit",
+
+  "host.games_header": "Available games:",
+  "host.pick_game": "Pick game number: ",
+  "host.max_players": "Max players (2-{max}): ",
+  "host.join_session": "Session number: ",
+  "host.chat_prompt": "{name} chat> ",
+
+  "game.header": "In Game",
+  "game.waiting": "Waiting for game to start...",
+  "game.over": "Game Over",
+  "game.winner": "Winner: {winner}",
+  "game.draw": "Draw!",
+  "game.your_turn": "Your move",
+  "game.chat_hint": "[T] chat",
+  "game.move_prompt": "move> ",
+  "game.chat_prompt": "chat> ",
+  "game.continue": "Press Enter to continue...",
+  "game.chat_header": "Chat",
+
+  "error.not_your_turn": "not your turn",
+  "error.invalid_move": "invalid move",
+
+  "nim.title": "Nim",
+  "nim.pile": "  pile {i}: {bar} ({count})",
+  "nim.turn": "  turn: {player}",
+
+  "mastermind.title": "Mastermind  (4 digits, 1-6)",
+  "mastermind.guess": "  {n}. {guess}  exact={exact} mis={mis}",
+  "mastermind.remaining": "  guesses left: {n}",
+
+  "connect4.title": "Connect Four",
+
+  "othello.title": "Othello",
+
+  "checkers.title": "Checkers  r=red R=red-king b=black B=black-king",
+
+  "chess.title": "Chess",
+  "chess.board_header": "  a b c d e f g h",
+  "chess.turn": "  turn: {player}",
+
+  "battleship.title": "Battleship  [{player}]",
+  "battleship.own_board": "  Own board:",
+  "battleship.enemy_board": "  Enemy ({opp}):",
+
+  "go.title": "Go {size}x{size}  captures: {captures}",
+
+  "hex.title": "Hex 11x11  (B:top-bottom  W:left-right)",
+
+  "quoridor.title": "Quoridor  [{walls}]",
+  "quoridor.walls_entry": "{player}:{n} walls",
+
+  "mancala.title": "Mancala",
+  "mancala.player_row": "  {player}: {pits}  store={store}",
+  "mancala.turn": "  turn: {player}"
+}
