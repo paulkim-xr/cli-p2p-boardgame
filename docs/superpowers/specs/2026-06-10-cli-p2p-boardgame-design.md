@@ -142,9 +142,9 @@ p2p-cli-games/
 ### Build Order
 
 1. **Python client** — reference implementation. Establishes all game logic and protocol behavior.
-2. **Bun client** — port from Python. TypeScript gives type safety for the protocol types.
-3. **Windows `.exe`** — `bun build --compile clients/bun/main.ts --outfile dist/gamehub.exe` (no extra work).
-4. **Node.js client** — port from Bun. Mostly `.ts` → `.js` with minor API differences (dgram vs Bun.udpSocket etc).
+2. **Node.js client** — port from Python. Most widely used runtime in the team, highest priority after the reference.
+3. **Bun client** — port from Node.js. TypeScript native; mostly a type-annotated version with Bun API differences.
+4. **Windows `.exe`** — `bun build --compile clients/bun/main.ts --outfile dist/gamehub.exe`. Bun embeds its runtime into the binary — the resulting `.exe` is fully self-contained, no Bun, Node.js, or any other runtime required on the target machine.
 
 ---
 
