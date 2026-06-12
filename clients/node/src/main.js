@@ -10,7 +10,7 @@ const { MsgType } = require('./net/protocol');
 const { Beacon, Listener } = require('./lobby/discovery');
 const { loadGameClasses } = require('./lobby/session');
 const { ChatLog } = require('./chat');
-const { clear, header, getch, question, enableAnsiWindows, BOLD, RESET } = require('./ui/terminal');
+const { clear, header, getch, question, enableAnsiWindows, BOLD, RESET, DIM } = require('./ui/terminal');
 const { showLobby, promptHost, promptJoin, promptChat, renderGame } = require('./ui/lobby_screen');
 
 async function main() {
@@ -145,17 +145,33 @@ async function main() {
 }
 
 async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, sendChat) {
+  let lastSnap = null;
+  let gameName = null;
+
+  // Snapshot of everything that should trigger a re-render.
+  // Only clear+render when this changes — prevents flickering on the waiting player.
+  function snap() {
+    const g = getGame();
+    if (!g) return '__waiting__';
+    const chats = chatLog.recent(3).map(e => `${e.from}:${e.text}`).join('|');
+    return JSON.stringify(g.getState()) + '|' + chats;
+  }
+
   while (true) {
     const gameObj = getGame();
     if (!gameObj) {
-      clear();
-      header(t('game.waiting'));
+      const s = snap();
+      if (s !== lastSnap) { clear(); header(t('game.waiting')); lastSnap = s; }
       await new Promise(r => setTimeout(r, 500));
       continue;
     }
 
-    clear();
-    renderGame(gameObj, players, chatLog.recent(3));
+    const s = snap();
+    if (s !== lastSnap) {
+      clear();
+      renderGame(gameObj, players, chatLog.recent(3));
+      lastSnap = s;
+    }
 
     const [done, winner] = gameObj.isOver();
     if (done) {
@@ -169,17 +185,73 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
 
     if (gameObj.currentTurn() === name) {
       const raw = await question(t('game.move_prompt'));
-      if (!raw.trim()) continue;
-      if (raw.trim().toLowerCase() === 't') {
+      if (!raw.trim()) { lastSnap = null; continue; }
+
+      const cmd = raw.trim().toLowerCase();
+      if (cmd === 't') {
         const msg = await question(t('game.chat_prompt'));
         if (msg.trim()) sendChat(msg.trim());
+        lastSnap = null;
         continue;
       }
+      if (cmd === '?') {
+        showGameHelp(gameObj);
+        await question(t('game.continue'));
+        lastSnap = null;
+        continue;
+      }
+
       sendMove(parseMove(raw.trim()));
+      lastSnap = null;
     } else {
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 100));
     }
   }
+}
+
+const GAME_HELP = {
+  Nim:         ['Take ≥1 stone from exactly one pile each turn. Last to take wins.',
+                'Move: {"pile":0,"count":2}   (take 2 from pile 0)'],
+  Mastermind:  ['Guess the secret 4-digit code. B = right digit + right position.',
+                'W = right digit but wrong position.',
+                'Move: {"guess":[1,2,3,4]}'],
+  ConnectFour: ['Drop a piece into a column. First to connect 4 in a row wins.',
+                'Move: {"col":3}'],
+  Othello:     ['Place a disc to flip opponent pieces between yours.',
+                'Player with the most discs when the board is full wins.',
+                'Move: {"row":3,"col":4}'],
+  Checkers:    ['Jump over opponent pieces to capture them. Multi-jump if possible.',
+                'Reach the far end to become a king (can move backwards).',
+                'Move: {"from":[r,c],"to":[r,c]}'],
+  Chess:       ['Standard chess. Castling, en passant, and promotion all supported.',
+                'Move: {"from":"e2","to":"e4"}   castle: {"from":"e1","to":"g1"}'],
+  Battleship:  ['Place ships secretly, then take turns calling coordinates to sink them.',
+                'First to sink all opponent ships wins.',
+                'Move: {"row":3,"col":4}'],
+  Go:          ['Place stones to surround territory on a 9×9 board. Ko rule enforced.',
+                'Higher score (territory + captures) wins.',
+                'Move: {"row":3,"col":4}   or   {"pass":true}'],
+  Hex:         ['Connect your two opposite sides of the 11×11 board.',
+                'No draws — the board always fills before someone wins.',
+                'Move: {"row":3,"col":4}'],
+  Quoridor:    ['Race your pawn to the opposite side.',
+                'Place walls to block opponents, but never seal off someone completely.',
+                'Move pawn: {"row":5,"col":4}',
+                'Place wall: {"wall":{"row":3,"col":2,"dir":"h"}}   dir = h or v'],
+  Mancala:     ['Sow seeds counter-clockwise from your chosen pit.',
+                'Landing in your store earns a free turn; landing in your empty pit captures.',
+                'Player with more seeds in their store when one side empties wins.',
+                'Move: {"pit":2}   (pit index 0–5 on your side, left to right)'],
+};
+
+function showGameHelp(gameObj) {
+  clear();
+  header('? Help');
+  const lines = GAME_HELP[gameObj.constructor.name] || ['No help available for this game.'];
+  lines.forEach(l => console.log(`  ${l}`));
+  console.log();
+  console.log(`  ${DIM}t = chat   ? = this help   enter move as JSON above${RESET}`);
+  console.log();
 }
 
 function parseMove(raw) {
