@@ -1,5 +1,7 @@
 # Wire Protocol
 
+> [한국어](messages.ko.md)
+
 All messages are JSON objects, one per line, terminated by `\n`, sent over TCP.
 
 ## Message Types
