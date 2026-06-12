@@ -172,9 +172,24 @@ class Quoridor extends BaseGame {
     return {
       pos: Object.fromEntries(Object.entries(this.pos).map(([p, v]) => [p, [...v]])),
       wallsLeft: { ...this.wallsLeft },
+      hWalls: [...this._hWalls],
+      vWalls: [...this._vWalls],
       turn: this.currentTurn(),
       players: this.players,
     };
+  }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.pos) this.pos = Object.fromEntries(Object.entries(data.pos).map(([p, v]) => [p, [...v]]));
+    if (data.wallsLeft) this.wallsLeft = { ...data.wallsLeft };
+    if (data.hWalls) this._hWalls = new Set(data.hWalls);
+    if (data.vWalls) this._vWalls = new Set(data.vWalls);
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
   }
 }
 

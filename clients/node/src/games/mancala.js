@@ -106,6 +106,17 @@ class Mancala extends BaseGame {
       players: this.players,
     };
   }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.pits) this.pits = Object.fromEntries(Object.entries(data.pits).map(([k, v]) => [k, [...v]]));
+    if (data.store) this.store = { ...data.store };
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
 }
 
 module.exports = { Mancala };

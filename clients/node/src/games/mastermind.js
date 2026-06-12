@@ -99,6 +99,18 @@ class Mastermind extends BaseGame {
     }
     return state;
   }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.guesses) this._guesses = data.guesses.map(g => [...g]);
+    if (data.over != null) this._over = data.over;
+    if (data.code) this._code = [...data.code];
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
 }
 
 module.exports = { Mastermind };

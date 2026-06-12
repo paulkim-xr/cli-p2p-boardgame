@@ -63,7 +63,7 @@ async function promptChat(myName, { question }) {
 function renderGame(gameObj, players, chatLog, myName) {
   header(t('game.header'));
   console.log();
-  console.log(gameObj.render());
+  console.log(gameObj.render(myName));
   console.log();
   hr();
   if (chatLog.length) {

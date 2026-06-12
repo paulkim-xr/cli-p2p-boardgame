@@ -47,7 +47,16 @@ async function main() {
     if (type === MsgType.CHAT) {
       chatLog.add(msg.from || '?', msg.text || '');
     } else if (type === MsgType.PLAYER_LIST) {
-      players = msg.players || [];
+      const newPlayers = msg.players || [];
+      if (gameObj && !gameObj._over && players.length > newPlayers.length) {
+        const leaver = players.find(p => !newPlayers.includes(p));
+        if (leaver) {
+          gameObj._over = true;
+          gameObj._winner = newPlayers[0] || null;
+          gameObj._forfeitedBy = leaver;
+        }
+      }
+      players = newPlayers;
     } else if (type === MsgType.GAME_START) {
       const classes = loadGameClasses();
       const gname = msg.game;
@@ -57,7 +66,12 @@ async function main() {
       }
     } else if (type === MsgType.STATE) {
       if (gameObj && typeof gameObj.loadState === 'function') {
-        gameObj.loadState(msg.data || {});
+        gameObj.loadState(msg.data || {}, playerName);
+      }
+    } else if (type === MsgType.GAME_OVER) {
+      if (gameObj) {
+        gameObj._over = true;
+        gameObj._winner = msg.winner || null;
       }
     }
   }
@@ -154,7 +168,7 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
     const g = getGame();
     if (!g) return '__waiting__';
     const chats = chatLog.recent(3).map(e => `${e.from}:${e.text}`).join('|');
-    return JSON.stringify(g.getState()) + '|' + chats;
+    return JSON.stringify(g.getState(name)) + '|' + chats;
   }
 
   while (true) {
@@ -177,8 +191,13 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
     if (done) {
       clear();
       header(t('game.over'));
-      const msg = winner ? t('game.winner', { winner }) : t('game.draw');
-      console.log(`\n  ${BOLD}${msg}${RESET}\n`);
+      let endMsg;
+      if (gameObj._forfeitedBy) {
+        endMsg = `${gameObj._forfeitedBy} disconnected. ${winner ? winner + ' wins by forfeit!' : ''}`;
+      } else {
+        endMsg = winner ? t('game.winner', { winner }) : t('game.draw');
+      }
+      console.log(`\n  ${BOLD}${endMsg}${RESET}\n`);
       await question('  ' + t('game.continue'));
       return;
     }

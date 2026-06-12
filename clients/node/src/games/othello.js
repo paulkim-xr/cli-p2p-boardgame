@@ -117,6 +117,16 @@ class Othello extends BaseGame {
   getState(perspective) {
     return { board: this.board, turn: this.currentTurn(), players: this.players };
   }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.board) this.board = data.board.map(row => [...row]);
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
 }
 
 module.exports = { Othello };

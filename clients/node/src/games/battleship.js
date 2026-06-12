@@ -93,6 +93,7 @@ class Battleship extends BaseGame {
   }
 
   isOver() {
+    if (this._over) return [true, this._winner];
     if (this._phase !== 'battle') return [false, null];
     for (let i = 0; i < this.players.length; i++) {
       const opp = this.players[1 - i];
@@ -144,6 +145,30 @@ class Battleship extends BaseGame {
       myShots: shotsObj(this._shots[perspective] || new Map()),
       oppShots: opp ? shotsObj(this._shots[opp] || new Map()) : {},
     };
+  }
+
+  loadState(data, perspective) {
+    if (!data) return;
+    if (data.phase != null) this._phase = data.phase;
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      if (idx >= 0) {
+        if (this._phase === 'place') this._placeTurn = idx;
+        else this._turnIdx = idx;
+      }
+    }
+    if (perspective && this.players.includes(perspective)) {
+      const opp = this.players.find(p => p !== perspective);
+      if (data.ownShips) {
+        this._ships[perspective] = [new Set(data.ownShips)];
+      }
+      if (data.myShots) {
+        this._shots[perspective] = new Map(Object.entries(data.myShots));
+      }
+      if (opp && data.oppShots) {
+        this._shots[opp] = new Map(Object.entries(data.oppShots));
+      }
+    }
   }
 }
 

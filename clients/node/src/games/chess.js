@@ -277,6 +277,24 @@ class Chess extends BaseGame {
       check: !this._over ? this._inCheck(this._cmap[this.currentTurn()] || 'w') : false,
     };
   }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) {
+      this.players = data.players;
+      this._cmap = { [data.players[0]]: 'w', [data.players[1]]: 'b' };
+    }
+    if (data.board) {
+      this.board = {};
+      for (const [sq, piece] of Object.entries(data.board)) {
+        this.board[sq] = [...piece];
+      }
+    }
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
 }
 
 module.exports = { Chess };
