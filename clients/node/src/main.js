@@ -223,7 +223,14 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
         continue;
       }
 
-      sendMove(parseMove(raw.trim()));
+      const parsed = parseMove(raw.trim(), gameObj);
+      if (!parsed) {
+        console.log(`\n  ${DIM}Unrecognized input — type ? for help${RESET}\n`);
+        await new Promise(r => setTimeout(r, 1200));
+        lastSnap = null;
+        continue;
+      }
+      sendMove(parsed);
       lastSnap = null;
     } else {
       // Not our turn — still accept t (chat) and ? (help) via single-keypress
@@ -246,37 +253,36 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
 
 const GAME_HELP = {
   Nim:         ['Take ≥1 stone from exactly one pile each turn. Last to take wins.',
-                'Move: {"pile":0,"count":2}   (take 2 from pile 0)'],
-  Mastermind:  ['Guess the secret 4-digit code. B = right digit + right position.',
-                'W = right digit but wrong position.',
-                'Move: {"guess":[1,2,3,4]}'],
+                'Move: <pile> <count>   e.g. "0 2"  (take 2 stones from pile 0)'],
+  Mastermind:  ['Guess the secret 4-digit code (digits 1–6).',
+                'B = right digit + right position.  W = right digit, wrong position.',
+                'Move: <d1> <d2> <d3> <d4>   e.g. "1 2 3 4"  or  "1234"'],
   ConnectFour: ['Drop a piece into a column. First to connect 4 in a row wins.',
-                'Move: {"col":3}'],
-  Othello:     ['Place a disc to flip opponent pieces between yours.',
+                'Move: <col>   e.g. "3"'],
+  Othello:     ['Place a disc to flip opponent pieces sandwiched between yours.',
                 'Player with the most discs when the board is full wins.',
-                'Move: {"row":3,"col":4}'],
+                'Move: <row> <col>   e.g. "3 4"   or   "pass"'],
   Checkers:    ['Jump over opponent pieces to capture them. Multi-jump if possible.',
                 'Reach the far end to become a king (can move backwards).',
-                'Move: {"from":[r,c],"to":[r,c]}'],
+                'Move: <fromRow> <fromCol> <toRow> <toCol>   e.g. "2 3 4 5"'],
   Chess:       ['Standard chess. Castling, en passant, and promotion all supported.',
-                'Move: {"from":"e2","to":"e4"}   castle: {"from":"e1","to":"g1"}'],
+                'Move: <from> <to>   e.g. "e2 e4"   castle: "e1 g1"'],
   Battleship:  ['Place ships secretly, then take turns calling coordinates to sink them.',
-                'First to sink all opponent ships wins.',
-                'Move: {"row":3,"col":4}'],
+                'Place ship: <row> <col> <h|v>   e.g. "3 4 h"  (or "3 4 v" for vertical)',
+                'Shoot:      <row> <col>          e.g. "3 4"'],
   Go:          ['Place stones to surround territory on a 9×9 board. Ko rule enforced.',
                 'Higher score (territory + captures) wins.',
-                'Move: {"row":3,"col":4}   or   {"pass":true}'],
-  Hex:         ['Connect your two opposite sides of the 11×11 board.',
-                'No draws — the board always fills before someone wins.',
-                'Move: {"row":3,"col":4}'],
-  Quoridor:    ['Race your pawn to the opposite side.',
+                'Move: <row> <col>   e.g. "3 4"   or   "pass"'],
+  Hex:         ['Connect your two opposite sides of the 11×11 board. No draws.',
+                'Move: <row> <col>   e.g. "3 4"'],
+  Quoridor:    ['Race your pawn to the opposite side of the 9×9 board.',
                 'Place walls to block opponents, but never seal off someone completely.',
-                'Move pawn: {"row":5,"col":4}',
-                'Place wall: {"wall":{"row":3,"col":2,"dir":"h"}}   dir = h or v'],
+                'Move pawn: n / s / e / w   e.g. "s"',
+                'Place wall: <row> <col> <h|v>   e.g. "3 2 h"  (or "3 2 v" for vertical)'],
   Mancala:     ['Board shows  [0]:4  [1]:4  [2]:4  [3]:4  [4]:4  [5]:4  store=N',
                 'Pick a pit index 0–5 to sow its seeds counter-clockwise.',
                 'Land in your store → free turn.  Land in your own empty pit → capture opposite.',
-                'Move: {"pit":2}'],
+                'Move: <pit>   e.g. "2"'],
 };
 
 function showGameHelp(gameObj) {
@@ -285,12 +291,78 @@ function showGameHelp(gameObj) {
   const lines = GAME_HELP[gameObj.constructor.name] || ['No help available for this game.'];
   lines.forEach(l => console.log(`  ${l}`));
   console.log();
-  console.log(`  ${DIM}t = chat   ? = this help   enter move as JSON above${RESET}`);
+  console.log(`  ${DIM}t = chat   ? = this help${RESET}`);
   console.log();
 }
 
-function parseMove(raw) {
-  try { return JSON.parse(raw); } catch (_) { return { raw }; }
+function parseMove(raw, gameObj) {
+  const trimmed = raw.trim();
+
+  // Accept raw JSON only when it looks like an object/array literal
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    try {
+      const obj = JSON.parse(trimmed);
+      if (typeof obj === 'object' && obj !== null) return obj;
+    } catch (_) {}
+  }
+
+  const game = gameObj ? gameObj.constructor.name : '';
+  const parts = trimmed.split(/[\s,]+/).filter(Boolean);
+  const nums = parts.map(Number);
+  const allNums = parts.length > 0 && nums.every(n => !isNaN(n));
+
+  switch (game) {
+    case 'Mancala':
+      if (parts.length === 1 && !isNaN(nums[0])) return { pit: nums[0] };
+      break;
+    case 'Nim':
+      if (parts.length === 2 && allNums) return { pile: nums[0], count: nums[1] };
+      break;
+    case 'ConnectFour':
+      if (parts.length === 1 && !isNaN(nums[0])) return { col: nums[0] };
+      break;
+    case 'Othello':
+      if (trimmed.toLowerCase() === 'pass') return { pass: true };
+      if (parts.length === 2 && allNums) return { row: nums[0], col: nums[1] };
+      break;
+    case 'Checkers':
+      if (parts.length === 4 && allNums) return { from: [nums[0], nums[1]], to: [nums[2], nums[3]] };
+      break;
+    case 'Chess':
+      if (parts.length === 2) return { from: parts[0], to: parts[1] };
+      break;
+    case 'Battleship':
+      if (parts.length === 3 && !isNaN(nums[0]) && !isNaN(nums[1])) {
+        return { place: { row: nums[0], col: nums[1], horiz: parts[2].toLowerCase() !== 'v' } };
+      }
+      if (parts.length === 2 && allNums) {
+        if (gameObj._phase === 'place') return { place: { row: nums[0], col: nums[1], horiz: true } };
+        return { shot: { row: nums[0], col: nums[1] } };
+      }
+      break;
+    case 'Go':
+      if (trimmed.toLowerCase() === 'pass') return { pass: true };
+      if (parts.length === 2 && allNums) return { row: nums[0], col: nums[1] };
+      break;
+    case 'Hex':
+      if (parts.length === 2 && allNums) return { row: nums[0], col: nums[1] };
+      break;
+    case 'Quoridor':
+      if (parts.length === 1 && /^[nsew]$/i.test(parts[0])) return { move: parts[0].toUpperCase() };
+      if (parts.length === 3 && !isNaN(nums[0]) && !isNaN(nums[1])) {
+        return { wall: { row: nums[0], col: nums[1], horiz: parts[2].toLowerCase() === 'h' } };
+      }
+      break;
+    case 'Mastermind': {
+      let digits = [];
+      if (parts.length === 4 && allNums) digits = nums;
+      else if (parts.length === 1 && /^\d{4}$/.test(parts[0])) digits = parts[0].split('').map(Number);
+      if (digits.length === 4) return gameObj._code === null ? { code: digits } : { guess: digits };
+      break;
+    }
+  }
+
+  return null;
 }
 
 main().catch(err => {
