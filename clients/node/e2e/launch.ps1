@@ -13,16 +13,25 @@
     Press  q  in the lobby to quit.
 .EXAMPLE
     .\launch.ps1
+    .\launch.ps1 -Game connect_four -Player1 alice -Player2 bob
     .\launch.ps1 -Port 9876 -Game nim -Player1 alice -Player2 bob
 #>
 param(
-    [int]    $Port    = 9876,
+    [int]    $Port    = 0,       # 0 = pick a free port automatically
     [string] $Game    = 'nim',
     [string] $Player1 = 'alice',
     [string] $Player2 = 'bob'
 )
 
 $nodeDir = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+
+# Find a free port when none is specified
+if ($Port -eq 0) {
+    $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
+    $listener.Start()
+    $Port = $listener.LocalEndpoint.Port
+    $listener.Stop()
+}
 
 $hostScript  = "Set-Location '$nodeDir'; node src/main.js --name $Player1 --host $Game --port $Port"
 $guestScript = "Set-Location '$nodeDir'; node src/main.js --name $Player2 --join $Port"
