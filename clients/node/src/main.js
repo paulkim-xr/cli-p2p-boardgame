@@ -10,7 +10,7 @@ const { MsgType } = require('./net/protocol');
 const { Beacon, Listener } = require('./lobby/discovery');
 const { loadGameClasses } = require('./lobby/session');
 const { ChatLog } = require('./chat');
-const { clear, header, getch, question, enableAnsiWindows, BOLD, RESET, DIM } = require('./ui/terminal');
+const { clear, header, getch, getchTimeout, question, enableAnsiWindows, BOLD, RESET, DIM } = require('./ui/terminal');
 const { showLobby, promptHost, promptJoin, promptChat, renderGame } = require('./ui/lobby_screen');
 
 async function main() {
@@ -169,7 +169,7 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
     const s = snap();
     if (s !== lastSnap) {
       clear();
-      renderGame(gameObj, players, chatLog.recent(3));
+      renderGame(gameObj, players, chatLog.recent(3), name);
       lastSnap = s;
     }
 
@@ -190,7 +190,10 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
       const cmd = raw.trim().toLowerCase();
       if (cmd === 't') {
         const msg = await question(t('game.chat_prompt'));
-        if (msg.trim()) sendChat(msg.trim());
+        if (msg.trim()) {
+          sendChat(msg.trim());
+          await new Promise(r => setTimeout(r, 60)); // wait for loopback echo before re-render
+        }
         lastSnap = null;
         continue;
       }
@@ -204,7 +207,20 @@ async function gameLoop(name, clientObj, getGame, players, chatLog, sendMove, se
       sendMove(parseMove(raw.trim()));
       lastSnap = null;
     } else {
-      await new Promise(r => setTimeout(r, 100));
+      // Not our turn — still accept t (chat) and ? (help) via single-keypress
+      const ch = await getchTimeout(150);
+      if (ch === 't') {
+        const msg = await question(t('game.chat_prompt'));
+        if (msg.trim()) {
+          sendChat(msg.trim());
+          await new Promise(r => setTimeout(r, 60));
+        }
+        lastSnap = null;
+      } else if (ch === '?') {
+        showGameHelp(gameObj);
+        await question(t('game.continue'));
+        lastSnap = null;
+      }
     }
   }
 }
@@ -238,10 +254,10 @@ const GAME_HELP = {
                 'Place walls to block opponents, but never seal off someone completely.',
                 'Move pawn: {"row":5,"col":4}',
                 'Place wall: {"wall":{"row":3,"col":2,"dir":"h"}}   dir = h or v'],
-  Mancala:     ['Sow seeds counter-clockwise from your chosen pit.',
-                'Landing in your store earns a free turn; landing in your empty pit captures.',
-                'Player with more seeds in their store when one side empties wins.',
-                'Move: {"pit":2}   (pit index 0–5 on your side, left to right)'],
+  Mancala:     ['Board shows  [0]:4  [1]:4  [2]:4  [3]:4  [4]:4  [5]:4  store=N',
+                'Pick a pit index 0–5 to sow its seeds counter-clockwise.',
+                'Land in your store → free turn.  Land in your own empty pit → capture opposite.',
+                'Move: {"pit":2}'],
 };
 
 function showGameHelp(gameObj) {

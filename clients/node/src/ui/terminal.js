@@ -40,6 +40,33 @@ function getch() {
   });
 }
 
+// Like getch() but resolves null after ms if no key is pressed.
+function getchTimeout(ms) {
+  if (!process.stdin.isTTY) return new Promise(r => setTimeout(() => r(null), ms));
+  return new Promise(resolve => {
+    let done = false;
+    const onData = buf => {
+      if (done) return;
+      done = true;
+      process.stdin.removeListener('data', onData);
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      resolve(buf.toString('utf8').toLowerCase());
+    };
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on('data', onData);
+    setTimeout(() => {
+      if (done) return;
+      done = true;
+      process.stdin.removeListener('data', onData);
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      resolve(null);
+    }, ms);
+  });
+}
+
 function question(prompt) {
   const readline = require('readline');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -51,4 +78,4 @@ function question(prompt) {
   });
 }
 
-module.exports = { clear, header, hr, getch, question, enableAnsiWindows, BOLD, RESET, DIM, GREEN, YELLOW, CYAN };
+module.exports = { clear, header, hr, getch, getchTimeout, question, enableAnsiWindows, BOLD, RESET, DIM, GREEN, YELLOW, CYAN };

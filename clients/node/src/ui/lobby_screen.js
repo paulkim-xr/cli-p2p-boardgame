@@ -60,7 +60,7 @@ async function promptChat(myName, { question }) {
   return msg.trim() || null;
 }
 
-function renderGame(gameObj, players, chatLog) {
+function renderGame(gameObj, players, chatLog, myName) {
   header(t('game.header'));
   console.log();
   console.log(gameObj.render());
@@ -73,7 +73,11 @@ function renderGame(gameObj, players, chatLog) {
     }
   }
   console.log();
-  console.log(`  ${GREEN}${t('game.your_turn')}${RESET}   ${DIM}${t('game.chat_hint')}${RESET}`);
+  if (gameObj.currentTurn() === myName) {
+    console.log(`  ${GREEN}${t('game.your_turn')}${RESET}   ${DIM}[T] chat   [?] help${RESET}`);
+  } else {
+    console.log(`  ${DIM}Waiting for ${gameObj.currentTurn()}...   [T] chat   [?] help${RESET}`);
+  }
   console.log();
 }
 

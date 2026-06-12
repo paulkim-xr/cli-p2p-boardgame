@@ -91,7 +91,8 @@ class Mancala extends BaseGame {
   render(perspective) {
     const lines = [t('mancala.title')];
     for (const p of this.players) {
-      lines.push(t('mancala.player_row', { player: p, pits: JSON.stringify(this.pits[p]), store: this.store[p] }));
+      const pitStr = this.pits[p].map((s, i) => `[${i}]:${s}`).join('  ');
+      lines.push(t('mancala.player_row', { player: p, pits: pitStr, store: this.store[p] }));
     }
     lines.push(t('mancala.turn', { player: this.currentTurn() }));
     return lines.join('\n');
