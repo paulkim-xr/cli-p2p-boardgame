@@ -53,6 +53,16 @@ class Nim extends BaseGame {
   getState(perspective) {
     return { piles: [...this.piles], turn: this.currentTurn(), players: this.players };
   }
+
+  loadState(data) {
+    if (!data) return;
+    if (Array.isArray(data.piles)) this.piles = [...data.piles];
+    if (data.players) this.players = data.players;
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
 }
 
 module.exports = { Nim };

@@ -70,6 +70,40 @@ async function main() {
     if (clientObj) clientObj.send({ type: MsgType.MOVE, from: playerName, data });
   }
 
+  // --host <game>: skip lobby, auto-start hosting the named game (maxPlayers=2)
+  const hostFlagIdx = args.indexOf('--host');
+  if (hostFlagIdx !== -1 && args[hostFlagIdx + 1]) {
+    const gameName = args[hostFlagIdx + 1];
+    if (!loadGameClasses()[gameName]) {
+      console.error(`Unknown game: ${gameName}. Available: ${Object.keys(loadGameClasses()).join(', ')}`);
+      process.exit(1);
+    }
+    hostObj = new Host({ port, gameName, maxPlayers: 2 });
+    await hostObj.start();
+    const beacon = new Beacon({ port, host: playerName, game: gameName, players: [], maxPlayers: 2 });
+    beacon.start();
+    clientObj = new Client('127.0.0.1', port, playerName, onMessage);
+    await clientObj.connect();
+    await new Promise(r => setTimeout(r, 200));
+    await gameLoop(playerName, clientObj, () => gameObj, players, chatLog, sendMove, sendChat);
+    process.exit(0);
+  }
+
+  // --join <port>: skip lobby, connect directly to 127.0.0.1:<port>
+  const joinFlagIdx = args.indexOf('--join');
+  if (joinFlagIdx !== -1 && args[joinFlagIdx + 1]) {
+    const joinPort = parseInt(args[joinFlagIdx + 1], 10);
+    if (isNaN(joinPort)) {
+      console.error(`Invalid port: ${args[joinFlagIdx + 1]}`);
+      process.exit(1);
+    }
+    clientObj = new Client('127.0.0.1', joinPort, playerName, onMessage);
+    await clientObj.connect();
+    await new Promise(r => setTimeout(r, 300));
+    await gameLoop(playerName, clientObj, () => gameObj, players, chatLog, sendMove, sendChat);
+    process.exit(0);
+  }
+
   let running = true;
   while (running) {
     clear();
