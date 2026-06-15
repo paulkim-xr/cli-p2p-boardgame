@@ -60,10 +60,10 @@ export async function promptChat(myName: string, opts: { question: (p: string) =
   return msg.trim() || null;
 }
 
-export function renderGame(gameObj: BaseGame, _players: string[], chatLog: ChatEntry[]): void {
+export function renderGame(gameObj: BaseGame, _players: string[], chatLog: ChatEntry[], perspective?: string): void {
   header(t('game.header'));
   console.log();
-  console.log(gameObj.render());
+  console.log(gameObj.render(perspective));
   console.log();
   hr();
   if (chatLog.length) {

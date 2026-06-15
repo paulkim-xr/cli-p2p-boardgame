@@ -1,15 +1,13 @@
-import { BaseGame } from './base';
+import { BaseGameImpl } from './base';
 import { t } from '../framework/i18n';
 
-export class Go extends BaseGame {
+export class Go extends BaseGameImpl {
   readonly size: number;
   board: (string | null)[][];
   private _turnIdx = 0;
   private _captures: Record<string, number> = {};
   private _prevBoards: Set<string> = new Set();
   private _passes = 0;
-  private _over = false;
-  private _winner: string | null = null;
 
   constructor(size = 9) {
     super();
@@ -132,7 +130,29 @@ export class Go extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return { board: this.board, turn: this.currentTurn(), captures: { ...this._captures }, players: this.players };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.toLowerCase() === 'pass') return { pass: true };
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const row = Number(parts[0]), col = Number(parts[1]);
+      if (!isNaN(row) && !isNaN(col)) return { row, col };
+    }
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Place stones to surround territory on a 9×9 board. Ko rule enforced.',
+      'Higher score (territory + captures) wins.',
+      'Move: <row> <col>   e.g. "3 4"   or   "pass"',
+    ];
   }
 }

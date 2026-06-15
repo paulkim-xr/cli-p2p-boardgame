@@ -1,13 +1,11 @@
-import { BaseGame } from './base';
+import { BaseGameImpl } from './base';
 import { t } from '../framework/i18n';
 
 type Piece = [string, boolean] | null;
 
-export class Checkers extends BaseGame {
+export class Checkers extends BaseGameImpl {
   board: Piece[][];
   private _turnIdx = 0;
-  private _over = false;
-  private _winner: string | null = null;
 
   constructor() {
     super();
@@ -110,7 +108,28 @@ export class Checkers extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return { board: this.board.map(row => row.map(c => c ? [...c] : null)), turn: this.currentTurn(), players: this.players };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 4) {
+      const nums = parts.map(Number);
+      if (nums.every(n => !isNaN(n))) return { from: [nums[0], nums[1]], to: [nums[2], nums[3]] };
+    }
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Jump over opponent pieces to capture them. Multi-jump if possible.',
+      'Reach the far end to become a king (can move backwards).',
+      'Move: <fromRow> <fromCol> <toRow> <toCol>   e.g. "2 3 4 5"',
+    ];
   }
 }

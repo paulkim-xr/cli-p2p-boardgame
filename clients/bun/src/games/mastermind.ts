@@ -1,14 +1,12 @@
-import { BaseGame } from './base';
+import { BaseGameImpl } from './base';
 import { t } from '../framework/i18n';
 
 const MAX_GUESSES = 10;
 
-export class Mastermind extends BaseGame {
+export class Mastermind extends BaseGameImpl {
   private _code: number[] | null = null;
   private _guesses: [number[], number, number][] = [];
   private _turnIdx = 0;
-  private _over = false;
-  private _winner: string | null = null;
 
   start(players: string[]): void {
     this.players = players;
@@ -78,7 +76,7 @@ export class Mastermind extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(perspective: string): unknown {
+  getState(perspective?: string): Record<string, unknown> {
     const state: Record<string, unknown> = {
       guesses: this._guesses,
       turn: this.currentTurn(),
@@ -87,5 +85,32 @@ export class Mastermind extends BaseGame {
     };
     if (perspective === this.players[0] || this._over) state['code'] = this._code;
     return state;
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    let digits: number[] | null = null;
+    if (parts.length === 4) {
+      const nums = parts.map(Number);
+      if (nums.every(n => !isNaN(n))) digits = nums;
+    } else if (parts.length === 1 && /^\d{4}$/.test(parts[0])) {
+      digits = parts[0].split('').map(Number);
+    }
+    if (digits && digits.length === 4) {
+      return this._code === null ? { code: digits } : { guess: digits };
+    }
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Guess the secret 4-digit code (digits 1–6).',
+      'B = right digit + right position.  W = right digit, wrong position.',
+      'Move: <d1> <d2> <d3> <d4>   e.g. "1 2 3 4"  or  "1234"',
+    ];
   }
 }

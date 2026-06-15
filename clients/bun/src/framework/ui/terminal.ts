@@ -47,3 +47,31 @@ export function question(prompt: string): Promise<string> {
     });
   });
 }
+
+export function getchTimeout(ms: number): Promise<string | null> {
+  return new Promise((resolve) => {
+    let resolved = false;
+    const timer = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        try { process.stdin.setRawMode(false); process.stdin.pause(); } catch (_) {}
+        resolve(null);
+      }
+    }, ms);
+    try {
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.once('data', (buf: Buffer) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timer);
+          try { process.stdin.setRawMode(false); process.stdin.pause(); } catch (_) {}
+          resolve(buf.toString('utf8').toLowerCase());
+        }
+      });
+    } catch (_) {
+      clearTimeout(timer);
+      resolve(null);
+    }
+  });
+}
