@@ -53,3 +53,23 @@ def test_vertical_win():
         count += 1
     done, winner = g.is_over()
     assert done and winner == 'alice'
+
+
+def test_load_state_restores_board():
+    g = make()
+    g.apply_move('alice', {'col': 3})
+    state = g.get_state()
+    g2 = ConnectFour()
+    g2.start(['alice', 'bob'])
+    g2.load_state(state)
+    assert g2.board[5][3] == 'alice'
+    assert g2.current_turn() == 'bob'
+
+def test_parse_input_col():
+    assert make().parse_input('3') == {'col': 3}
+
+def test_parse_input_invalid():
+    assert make().parse_input('abc') is None
+
+def test_get_help_nonempty():
+    assert len(make().get_help()) >= 2
