@@ -1,4 +1,4 @@
-﻿from games.base import BaseGame
+from games.base import BaseGame
 from typing import List, Optional
 from framework.i18n import t
 

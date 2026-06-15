@@ -1,4 +1,4 @@
-﻿from games.base import BaseGame
+from games.base import BaseGame
 from collections import deque
 from framework.i18n import t
 

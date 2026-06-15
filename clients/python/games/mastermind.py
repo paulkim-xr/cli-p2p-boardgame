@@ -1,4 +1,4 @@
-﻿from collections import Counter
+from collections import Counter
 from games.base import BaseGame
 from framework.i18n import t
 
