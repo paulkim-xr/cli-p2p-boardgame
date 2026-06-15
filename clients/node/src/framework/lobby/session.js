@@ -16,17 +16,17 @@ const GAMES = {
 
 function loadGameClasses() {
   return {
-    nim:        require('../games/nim').Nim,
-    mastermind: require('../games/mastermind').Mastermind,
-    connect4:   require('../games/connect_four').ConnectFour,
-    othello:    require('../games/othello').Othello,
-    checkers:   require('../games/checkers').Checkers,
-    chess:      require('../games/chess').Chess,
-    battleship: require('../games/battleship').Battleship,
-    go:         require('../games/go').Go,
-    hex:        require('../games/hex_game').Hex,
-    quoridor:   require('../games/quoridor').Quoridor,
-    mancala:    require('../games/mancala').Mancala,
+    nim:        require('../../games/nim').Nim,
+    mastermind: require('../../games/mastermind').Mastermind,
+    connect4:   require('../../games/connect_four').ConnectFour,
+    othello:    require('../../games/othello').Othello,
+    checkers:   require('../../games/checkers').Checkers,
+    chess:      require('../../games/chess').Chess,
+    battleship: require('../../games/battleship').Battleship,
+    go:         require('../../games/go').Go,
+    hex:        require('../../games/hex_game').Hex,
+    quoridor:   require('../../games/quoridor').Quoridor,
+    mancala:    require('../../games/mancala').Mancala,
   };
 }
 

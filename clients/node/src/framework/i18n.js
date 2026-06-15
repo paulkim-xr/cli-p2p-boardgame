@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const LOCALES_DIR = path.join(__dirname, '..', 'locales');
+const LOCALES_DIR = path.join(__dirname, '..', '..', 'locales');
 
 let _translations = {};
 let _fallback = {};
