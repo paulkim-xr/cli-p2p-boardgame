@@ -117,6 +117,24 @@ class Mancala extends BaseGame {
       this._turnIdx = idx >= 0 ? idx : 0;
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const n = Number(trimmed.split(/\s+/)[0]);
+    return isNaN(n) ? null : { pit: n };
+  }
+
+  getHelp() {
+    return [
+      'Board shows  [0]:4  [1]:4  [2]:4  [3]:4  [4]:4  [5]:4  store=N',
+      'Pick a pit index 0-5 to sow its seeds counter-clockwise.',
+      'Land in your store -> free turn.  Land in your own empty pit -> capture opposite.',
+      'Move: <pit>   e.g. "2"',
+    ];
+  }
 }
 
 module.exports = { Mancala };
