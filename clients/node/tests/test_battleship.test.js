@@ -63,3 +63,41 @@ test('duplicate shot rejected', () => {
   g.applyMove('bob',   { shot: { row: 9, col: 9 } });
   assert.ok(!g.validateMove('alice', { shot: { row: 0, col: 0 } }));
 });
+
+test('battleship parseInput "3 4 h" returns place', () => {
+  const g = new Battleship();
+  const result = g.parseInput('3 4 h');
+  assert.deepStrictEqual(result, { place: { row: 3, col: 4, horiz: true } });
+});
+
+test('battleship parseInput "3 4 v" returns place vertical', () => {
+  const g = new Battleship();
+  const result = g.parseInput('3 4 v');
+  assert.deepStrictEqual(result, { place: { row: 3, col: 4, horiz: false } });
+});
+
+test('battleship parseInput "3 4" in place phase returns place', () => {
+  const g = new Battleship();
+  // default phase is 'place'
+  const result = g.parseInput('3 4');
+  assert.deepStrictEqual(result, { place: { row: 3, col: 4, horiz: true } });
+});
+
+test('battleship parseInput "3 4" in battle phase returns shot', () => {
+  const g = new Battleship();
+  g._phase = 'battle';
+  const result = g.parseInput('3 4');
+  assert.deepStrictEqual(result, { shot: { row: 3, col: 4 } });
+});
+
+test('battleship parseInput invalid returns null', () => {
+  const g = new Battleship();
+  assert.strictEqual(g.parseInput('abc'), null);
+});
+
+test('battleship getHelp returns array of length >= 2', () => {
+  const g = new Battleship();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});

@@ -170,6 +170,36 @@ class Battleship extends BaseGame {
       }
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 3) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        return { place: { row: r, col: c, horiz: parts[2].toLowerCase() !== 'v' } };
+      }
+    }
+    if (parts.length === 2) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        if (this._phase === 'place') return { place: { row: r, col: c, horiz: true } };
+        return { shot: { row: r, col: c } };
+      }
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Place ships secretly, then take turns calling coordinates to sink them.',
+      'Place ship: <row> <col> <h|v>   e.g. "3 4 h"  (or "3 4 v" for vertical)',
+      'Shoot:      <row> <col>          e.g. "3 4"',
+    ];
+  }
 }
 
 module.exports = { Battleship };
