@@ -97,6 +97,26 @@ class Hex extends BaseGame {
       this._turnIdx = idx >= 0 ? idx : 0;
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const row = Number(parts[0]), col = Number(parts[1]);
+      if (!isNaN(row) && !isNaN(col)) return { row, col };
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Connect your two opposite sides of the 11x11 board. No draws.',
+      'Move: <row> <col>   e.g. "3 4"',
+    ];
+  }
 }
 
 module.exports = { Hex };
