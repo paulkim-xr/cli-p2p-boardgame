@@ -295,6 +295,23 @@ class Chess extends BaseGame {
       this._turnIdx = idx >= 0 ? idx : 0;
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) return { from: parts[0], to: parts[1] };
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Standard chess. Castling, en passant, and promotion all supported.',
+      'Move: <from> <to>   e.g. "e2 e4"   castle: "e1 g1"',
+    ];
+  }
 }
 
 module.exports = { Chess };

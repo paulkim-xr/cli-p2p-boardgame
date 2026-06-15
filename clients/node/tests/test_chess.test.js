@@ -56,3 +56,27 @@ test('render shows board', () => {
   assert.ok(out.includes('R'));
   assert.ok(out.includes('P'));
 });
+
+test('chess parseInput "e2 e4"', () => {
+  const g = new Chess();
+  const result = g.parseInput('e2 e4');
+  assert.deepStrictEqual(result, { from: 'e2', to: 'e4' });
+});
+
+test('chess parseInput valid JSON', () => {
+  const g = new Chess();
+  const result = g.parseInput('{"from":"e2","to":"e4"}');
+  assert.deepStrictEqual(result, { from: 'e2', to: 'e4' });
+});
+
+test('chess parseInput single token returns null', () => {
+  const g = new Chess();
+  assert.strictEqual(g.parseInput('e2'), null);
+});
+
+test('chess getHelp returns array of length >= 2', () => {
+  const g = new Chess();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});
