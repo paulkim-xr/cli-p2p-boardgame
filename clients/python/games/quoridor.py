@@ -1,6 +1,6 @@
-from games.base import BaseGame
+﻿from games.base import BaseGame
 from collections import deque
-from i18n import t
+from framework.i18n import t
 
 SIZE = 9
 DIRS = {'N': (-1, 0), 'S': (1, 0), 'E': (0, 1), 'W': (0, -1)}

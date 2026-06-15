@@ -5,17 +5,17 @@ import sys
 import threading
 import time
 
-import i18n
-from i18n import t
-from config import load_port
-from net.host import Host
-from net.client import Client
-from net.protocol import MsgType
-from lobby.discovery import Beacon, Listener
-from lobby.session import GAMES
-from chat import ChatLog
-from ui.terminal import clear, header, getch, BOLD, RESET, DIM, GREEN, YELLOW
-from ui.lobby_screen import show_lobby, prompt_host, prompt_join, prompt_chat, render_game
+import framework.i18n as i18n
+from framework.i18n import t
+from framework.config import load_port
+from framework.net.host import Host
+from framework.net.client import Client
+from framework.net.protocol import MsgType
+from framework.lobby.discovery import Beacon, Listener
+from framework.lobby.session import GAMES
+from framework.chat import ChatLog
+from framework.ui.terminal import clear, header, getch, BOLD, RESET, DIM, GREEN, YELLOW
+from framework.ui.lobby_screen import show_lobby, prompt_host, prompt_join, prompt_chat, render_game
 
 
 def main():
@@ -52,7 +52,7 @@ def main():
         elif t == MsgType.PLAYER_LIST:
             players[:] = msg.get('players', [])
         elif t == MsgType.GAME_START:
-            from lobby.session import _load_game_classes
+            from framework.lobby.session import _load_game_classes
             classes = _load_game_classes()
             game_name = msg.get('game')
             if game_name in classes:

@@ -1,6 +1,6 @@
 import sys, json
 sys.path.insert(0, 'clients/python')
-from net.protocol import encode, decode, MsgType
+from framework.net.protocol import encode, decode, MsgType
 
 
 def test_encode_produces_newline_terminated_bytes():

@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.insert(0, 'clients/python')
-import i18n
+from framework import i18n
 
 
 def test_korean_default():

@@ -1,7 +1,7 @@
 import sys, time
 sys.path.insert(0, 'clients/python')
 from tests.conftest import find_free_port
-from lobby.discovery import Beacon, Listener
+from framework.lobby.discovery import Beacon, Listener
 
 
 def test_listener_discovers_beacon():

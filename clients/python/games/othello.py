@@ -1,5 +1,5 @@
-from games.base import BaseGame
-from i18n import t
+﻿from games.base import BaseGame
+from framework.i18n import t
 
 SIZE = 8
 DIRS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
