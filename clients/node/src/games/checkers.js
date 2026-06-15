@@ -148,6 +148,27 @@ class Checkers extends BaseGame {
       this._turnIdx = idx >= 0 ? idx : 0;
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 4) {
+      const nums = parts.map(Number);
+      if (nums.every(n => !isNaN(n))) return { from: [nums[0], nums[1]], to: [nums[2], nums[3]] };
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Jump over opponent pieces to capture them. Multi-jump if possible.',
+      'Reach the far end to become a king (can move backwards).',
+      'Move: <fromRow> <fromCol> <toRow> <toCol>   e.g. "2 3 4 5"',
+    ];
+  }
 }
 
 module.exports = { Checkers };
