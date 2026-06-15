@@ -35,4 +35,23 @@ describe('Mastermind', () => {
     const out = g.render();
     expect(out.length).toBeGreaterThan(0);
   });
+
+  test('parseInput: space-separated sets code when no code yet', () => {
+    expect(g.parseInput('1 2 3 4')).toEqual({ code: [1,2,3,4] });
+  });
+
+  test('parseInput: compact 4-digit sets guess after code', () => {
+    g.applyMove('alice', { code: [1,2,3,4] });
+    expect(g.parseInput('5656')).toEqual({ guess: [5,6,5,6] });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+    expect(g.parseInput('1 2 3')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    const help = g.getHelp();
+    expect(help.length).toBeGreaterThan(0);
+  });
 });

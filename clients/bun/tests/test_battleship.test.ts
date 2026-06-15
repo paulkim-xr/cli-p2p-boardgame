@@ -38,4 +38,22 @@ describe('Battleship', () => {
     }
     expect(g.validateMove('alice', { shot: { row: 0, col: 5 } })).toBe(true);
   });
+
+  test('parseInput: place with h/v', () => {
+    expect(g.parseInput('3 4 h')).toEqual({ place: { row: 3, col: 4, horiz: true } });
+    expect(g.parseInput('3 4 v')).toEqual({ place: { row: 3, col: 4, horiz: false } });
+  });
+
+  test('parseInput: 2 numbers defaults to place in place phase', () => {
+    const result = g.parseInput('3 4');
+    expect(result).toEqual({ place: { row: 3, col: 4, horiz: true } });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

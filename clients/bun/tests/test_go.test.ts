@@ -36,4 +36,20 @@ describe('Go', () => {
     g.applyMove('alice', { row: 1, col: 0 });
     expect(g.board[0][0]).toBeNull();
   });
+
+  test('parseInput: row col', () => {
+    expect(g.parseInput('3 4')).toEqual({ row: 3, col: 4 });
+  });
+
+  test('parseInput: pass', () => {
+    expect(g.parseInput('pass')).toEqual({ pass: true });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

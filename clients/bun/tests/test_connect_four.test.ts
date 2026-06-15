@@ -30,4 +30,16 @@ describe('ConnectFour', () => {
     const out = g.render();
     expect(out).toContain('X');
   });
+
+  test('parseInput: column number', () => {
+    expect(g.parseInput('3')).toEqual({ col: 3 });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

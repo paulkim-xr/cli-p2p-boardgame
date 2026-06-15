@@ -39,4 +39,17 @@ describe('Chess', () => {
     expect(out).toContain('K');
     expect(out).toContain('a b c d e f g h');
   });
+
+  test('parseInput: from-to algebraic', () => {
+    expect(g.parseInput('e2 e4')).toEqual({ from: 'e2', to: 'e4' });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('e2')).toBeNull();
+    expect(g.parseInput('abc xyz def')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

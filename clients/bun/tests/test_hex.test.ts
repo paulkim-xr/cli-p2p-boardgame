@@ -33,4 +33,16 @@ describe('Hex', () => {
     expect(done).toBe(true);
     expect(winner).toBe('alice');
   });
+
+  test('parseInput: row col', () => {
+    expect(g.parseInput('3 4')).toEqual({ row: 3, col: 4 });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });
