@@ -54,3 +54,30 @@ def test_multiplayer_three_players():
     assert g.current_turn() == 'b'
     g.apply_move('b', {'pile': 1, 'count': 1})
     assert g.current_turn() == 'c'
+
+
+def test_load_state_restores():
+    g = make()
+    g.apply_move('alice', {'pile': 0, 'count': 2})
+    state = g.get_state()
+    g2 = Nim()
+    g2.start(['alice', 'bob'])
+    g2.load_state(state)
+    assert g2.piles == g.piles
+    assert g2.current_turn() == 'bob'
+
+
+def test_parse_input_pile_count():
+    assert make().parse_input('0 2') == {'pile': 0, 'count': 2}
+
+
+def test_parse_input_invalid():
+    assert make().parse_input('xyz') is None
+
+
+def test_parse_input_json_fallback():
+    assert make().parse_input('{"pile": 1, "count": 3}') == {'pile': 1, 'count': 3}
+
+
+def test_get_help_nonempty():
+    assert len(make().get_help()) >= 2
