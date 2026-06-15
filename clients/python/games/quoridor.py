@@ -1,6 +1,7 @@
 from games.base import BaseGame
 from collections import deque
 from framework.i18n import t
+from typing import Optional, List
 
 SIZE = 9
 DIRS = {'N': (-1, 0), 'S': (1, 0), 'E': (0, 1), 'W': (0, -1)}
@@ -152,7 +153,58 @@ class Quoridor(BaseGame):
             lines.append(row)
         return '\n'.join(lines)
 
-    def get_state(self, perspective=None):
-        return {'pos': {p: list(v) for p, v in self.pos.items()},
-                'walls_left': self.walls_left, 'turn': self.current_turn(),
-                'players': self.players}
+    def get_state(self, perspective=None) -> dict:
+        return {
+            'pos': {p: list(v) for p, v in self.pos.items()},
+            'walls_left': dict(self.walls_left),
+            'turn': self.current_turn(),
+            'players': self.players,
+            'h_walls': [list(w) for w in self._h_walls],
+            'v_walls': [list(w) for w in self._v_walls],
+        }
+
+    def load_state(self, data: dict, perspective=None) -> None:
+        if not data:
+            return
+        if 'players' in data:
+            self.players = list(data['players'])
+        if 'pos' in data:
+            self.pos = {p: tuple(v) for p, v in data['pos'].items()}
+        if 'walls_left' in data:
+            self.walls_left = dict(data['walls_left'])
+        if 'turn' in data and data['turn'] in self.players:
+            self._turn_idx = self.players.index(data['turn'])
+        if 'h_walls' in data:
+            self._h_walls = {tuple(w) for w in data['h_walls']}
+        if 'v_walls' in data:
+            self._v_walls = {tuple(w) for w in data['v_walls']}
+
+    def parse_input(self, raw: str) -> Optional[dict]:
+        import json as _json, re
+        raw = raw.strip()
+        if raw.startswith('{'):
+            try:
+                obj = _json.loads(raw)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                pass
+        parts = raw.split()
+        if len(parts) == 1 and re.match(r'^[nsewNSEW]$', parts[0]):
+            return {'move': parts[0].upper()}
+        if len(parts) == 3:
+            try:
+                r, c = int(parts[0]), int(parts[1])
+                horiz = parts[2].lower() == 'h'
+                return {'wall': {'row': r, 'col': c, 'horiz': horiz}}
+            except ValueError:
+                pass
+        return None
+
+    def get_help(self) -> List[str]:
+        return [
+            'Race your pawn to the opposite side of the 9×9 board.',
+            'Place walls to block opponents, but never seal off someone completely.',
+            'Move pawn: n / s / e / w   e.g. "s"',
+            'Place wall: <row> <col> <h|v>   e.g. "3 2 h"  (or "3 2 v" for vertical)',
+        ]

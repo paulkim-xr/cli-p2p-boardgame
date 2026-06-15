@@ -9,6 +9,10 @@ def make2():
     return g
 
 
+def make():
+    return make2()
+
+
 def test_initial_positions():
     g = make2()
     assert g.pos['alice'] == (0, 4)
@@ -50,3 +54,33 @@ def test_wall_placement():
     assert g.validate_move('alice', {'wall': {'row': 2, 'col': 2, 'horiz': True}})
     g.apply_move('alice', {'wall': {'row': 2, 'col': 2, 'horiz': True}})
     assert g.walls_left['alice'] == 9
+
+
+def test_load_state_restores_pos():
+    g = make()
+    state = g.get_state()
+    g2 = Quoridor()
+    g2.start(['alice', 'bob'])
+    g2.load_state(state)
+    assert g2.pos == g.pos
+
+
+def test_parse_input_direction():
+    assert make().parse_input('s') == {'move': 'S'}
+    assert make().parse_input('N') == {'move': 'N'}
+
+
+def test_parse_input_wall_h():
+    assert make().parse_input('3 2 h') == {'wall': {'row': 3, 'col': 2, 'horiz': True}}
+
+
+def test_parse_input_wall_v():
+    assert make().parse_input('3 2 v') == {'wall': {'row': 3, 'col': 2, 'horiz': False}}
+
+
+def test_parse_input_invalid():
+    assert make().parse_input('xyz') is None
+
+
+def test_get_help_nonempty():
+    assert len(make().get_help()) >= 3
