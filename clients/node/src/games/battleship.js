@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 const SHIP_SIZES = [5, 4, 3, 3, 2];
 const GRID = 10;

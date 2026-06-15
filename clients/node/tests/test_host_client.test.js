@@ -2,9 +2,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const net = require('net');
-const { Host } = require('../src/net/host');
-const { Client } = require('../src/net/client');
-const { MsgType } = require('../src/net/protocol');
+const { Host } = require('../src/framework/net/host');
+const { Client } = require('../src/framework/net/client');
+const { MsgType } = require('../src/framework/net/protocol');
 
 function freePort() {
   return new Promise((resolve) => {

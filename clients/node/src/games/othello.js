@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 const SIZE = 8;
 const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];

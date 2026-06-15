@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 'use strict';
 
-const i18n = require('./i18n');
+const i18n = require('./framework/i18n');
 const { t, setLocale } = i18n;
-const { loadPort } = require('./config');
-const { Host } = require('./net/host');
-const { Client } = require('./net/client');
-const { MsgType } = require('./net/protocol');
-const { Beacon, Listener } = require('./lobby/discovery');
-const { loadGameClasses } = require('./lobby/session');
-const { ChatLog } = require('./chat');
-const { clear, header, getch, getchTimeout, question, enableAnsiWindows, BOLD, RESET, DIM } = require('./ui/terminal');
-const { showLobby, promptHost, promptJoin, promptChat, renderGame } = require('./ui/lobby_screen');
+const { loadPort } = require('./framework/config');
+const { Host } = require('./framework/net/host');
+const { Client } = require('./framework/net/client');
+const { MsgType } = require('./framework/net/protocol');
+const { Beacon, Listener } = require('./framework/lobby/discovery');
+const { loadGameClasses } = require('./framework/lobby/session');
+const { ChatLog } = require('./framework/chat');
+const { clear, header, getch, getchTimeout, question, enableAnsiWindows, BOLD, RESET, DIM } = require('./framework/ui/terminal');
+const { showLobby, promptHost, promptJoin, promptChat, renderGame } = require('./framework/ui/lobby_screen');
 
 async function main() {
   const args = process.argv.slice(2);

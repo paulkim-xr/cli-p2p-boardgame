@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 class Checkers extends BaseGame {
   constructor() {

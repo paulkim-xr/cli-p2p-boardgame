@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { t, setLocale, detectLocale, _supportedLocales } = require('../src/i18n');
+const { t, setLocale, detectLocale, _supportedLocales } = require('../src/framework/i18n');
 
 test('english locale', () => {
   setLocale('en');
