@@ -1,5 +1,7 @@
+from typing import List, Optional
 from games.base import BaseGame
 from framework.i18n import t
+import json
 
 SIZE = 8
 DIRS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -92,6 +94,42 @@ class Othello(BaseGame):
             lines.append(f'{i} ' + ' '.join(syms.get(c, '.') for c in row))
         return '\n'.join(lines)
 
-    def get_state(self, perspective=None):
-        return {'board': self.board, 'turn': self.current_turn(),
-                'players': self.players}
+    def get_state(self, perspective: Optional[str] = None) -> dict:
+        return {'board': [row[:] for row in self.board],
+                'turn': self.current_turn(), 'players': self.players}
+
+    def load_state(self, data: dict, perspective: Optional[str] = None) -> None:
+        if not data:
+            return
+        if 'players' in data:
+            self.players = list(data['players'])
+        if 'board' in data:
+            self.board = [list(row) for row in data['board']]
+        if 'turn' in data and data['turn'] in self.players:
+            self._turn_idx = self.players.index(data['turn'])
+
+    def parse_input(self, raw: str) -> Optional[dict]:
+        raw = raw.strip()
+        if raw.lower() == 'pass':
+            return {'pass': True}
+        if raw.startswith('{'):
+            try:
+                obj = json.loads(raw)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                pass
+        parts = raw.split()
+        if len(parts) == 2:
+            try:
+                return {'row': int(parts[0]), 'col': int(parts[1])}
+            except ValueError:
+                pass
+        return None
+
+    def get_help(self) -> List[str]:
+        return [
+            'Place a disc to flip opponent pieces sandwiched between yours.',
+            'Player with the most discs when the board is full wins.',
+            'Move: <row> <col>   e.g. "3 4"   or   "pass"',
+        ]
