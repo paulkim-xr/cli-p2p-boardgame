@@ -7,10 +7,10 @@
  * Run: node clients/node/e2e/mancala_e2e.js
  */
 const net    = require('net');
-const { Host }           = require('../src/net/host');
-const { Client }         = require('../src/net/client');
-const { MsgType }        = require('../src/net/protocol');
-const { loadGameClasses } = require('../src/lobby/session');
+const { Host }           = require('../src/framework/net/host');
+const { Client }         = require('../src/framework/net/client');
+const { MsgType }        = require('../src/framework/net/protocol');
+const { loadGameClasses } = require('../src/framework/lobby/session');
 
 const C = {
   reset: '\x1b[0m', dim: '\x1b[2m', bold: '\x1b[1m',
