@@ -1,6 +1,6 @@
-from lobby.session import GAMES
-from ui.terminal import header, hr, BOLD, RESET, DIM, CYAN, GREEN, YELLOW
-from i18n import t
+from framework.lobby.session import GAMES
+from framework.ui.terminal import header, hr, BOLD, RESET, DIM, CYAN, GREEN, YELLOW
+from framework.i18n import t
 
 
 def show_lobby(sessions, my_name, chat_log):
@@ -60,10 +60,10 @@ def prompt_chat(my_name):
     return msg or None
 
 
-def render_game(game_obj, players, chat_log):
+def render_game(game_obj, players, chat_log, perspective=None):
     header(t('game.header'))
     print()
-    print(game_obj.render())
+    print(game_obj.render(perspective))
     print()
     hr()
     if chat_log:
@@ -71,5 +71,9 @@ def render_game(game_obj, players, chat_log):
         for entry in chat_log[-3:]:
             print(f'  {DIM}{entry["from"]}{RESET}: {entry["text"]}')
     print()
-    print(f'  {GREEN}{t("game.your_turn")}{RESET}   {DIM}{t("game.chat_hint")}{RESET}')
+    if game_obj.current_turn() == perspective:
+        print(f'  {GREEN}{t("game.your_turn")}{RESET}   {DIM}[T] chat   [?] help{RESET}')
+    else:
+        turn = game_obj.current_turn()
+        print(f'  {DIM}Waiting for {turn}...   [T] chat   [?] help{RESET}')
     print()
