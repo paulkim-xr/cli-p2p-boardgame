@@ -1,5 +1,5 @@
 import { BaseGame } from './base';
-import { t } from '../i18n';
+import { t } from '../framework/i18n';
 
 const SIZE = 8;
 const DIRS: [number, number][] = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];

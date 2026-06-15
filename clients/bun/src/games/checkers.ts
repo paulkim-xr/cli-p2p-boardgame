@@ -1,5 +1,5 @@
 import { BaseGame } from './base';
-import { t } from '../i18n';
+import { t } from '../framework/i18n';
 
 type Piece = [string, boolean] | null;
 

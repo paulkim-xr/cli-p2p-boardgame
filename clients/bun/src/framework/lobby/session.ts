@@ -1,15 +1,15 @@
-import type { BaseGame } from '../games/base';
-import { Nim } from '../games/nim';
-import { Mastermind } from '../games/mastermind';
-import { ConnectFour } from '../games/connect_four';
-import { Othello } from '../games/othello';
-import { Checkers } from '../games/checkers';
-import { Chess } from '../games/chess';
-import { Battleship } from '../games/battleship';
-import { Go } from '../games/go';
-import { Hex } from '../games/hex_game';
-import { Quoridor } from '../games/quoridor';
-import { Mancala } from '../games/mancala';
+import type { BaseGame } from '../../games/base';
+import { Nim } from '../../games/nim';
+import { Mastermind } from '../../games/mastermind';
+import { ConnectFour } from '../../games/connect_four';
+import { Othello } from '../../games/othello';
+import { Checkers } from '../../games/checkers';
+import { Chess } from '../../games/chess';
+import { Battleship } from '../../games/battleship';
+import { Go } from '../../games/go';
+import { Hex } from '../../games/hex_game';
+import { Quoridor } from '../../games/quoridor';
+import { Mancala } from '../../games/mancala';
 
 export interface GameInfo {
   name: string;

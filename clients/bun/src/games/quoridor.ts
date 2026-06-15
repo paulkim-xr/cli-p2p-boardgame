@@ -1,5 +1,5 @@
 import { BaseGame } from './base';
-import { t } from '../i18n';
+import { t } from '../framework/i18n';
 
 const SIZE = 9;
 const DIRS: Record<string, [number, number]> = { N: [-1, 0], S: [1, 0], E: [0, 1], W: [0, -1] };

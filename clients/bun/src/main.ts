@@ -1,15 +1,15 @@
 #!/usr/bin/env bun
-import { t, setLocale } from './i18n';
-import { loadPort } from './config';
-import { Host } from './net/host';
-import { Client } from './net/client';
-import { MsgType } from './net/protocol';
-import type { WireMsg } from './net/protocol';
-import { Beacon, Listener } from './lobby/discovery';
-import { loadGameClasses } from './lobby/session';
-import { ChatLog } from './chat';
-import { clear, header, getch, question, enableAnsiWindows, BOLD, RESET } from './ui/terminal';
-import { showLobby, promptHost, promptJoin, promptChat, renderGame } from './ui/lobby_screen';
+import { t, setLocale } from './framework/i18n';
+import { loadPort } from './framework/config';
+import { Host } from './framework/net/host';
+import { Client } from './framework/net/client';
+import { MsgType } from './framework/net/protocol';
+import type { WireMsg } from './framework/net/protocol';
+import { Beacon, Listener } from './framework/lobby/discovery';
+import { loadGameClasses } from './framework/lobby/session';
+import { ChatLog } from './framework/chat';
+import { clear, header, getch, question, enableAnsiWindows, BOLD, RESET } from './framework/ui/terminal';
+import { showLobby, promptHost, promptJoin, promptChat, renderGame } from './framework/ui/lobby_screen';
 import type { BaseGame } from './games/base';
 
 async function main(): Promise<void> {

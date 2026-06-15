@@ -1,5 +1,5 @@
 import { BaseGame } from './base';
-import { t } from '../i18n';
+import { t } from '../framework/i18n';
 
 const SHIP_SIZES = [5, 4, 3, 3, 2];
 const GRID = 10;

@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { loadPort, DEFAULT_PORT } from '../src/config';
+import { loadPort, DEFAULT_PORT } from '../src/framework/config';
 
 describe('config', () => {
   test('default port', () => {

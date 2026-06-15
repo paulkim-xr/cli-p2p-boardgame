@@ -1,5 +1,5 @@
-import enData from '../locales/en.json';
-import koData from '../locales/ko.json';
+import enData from '../../locales/en.json';
+import koData from '../../locales/ko.json';
 
 type Translations = Record<string, string>;
 

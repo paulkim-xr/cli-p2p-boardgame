@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { t, setLocale } from '../src/i18n';
+import { t, setLocale } from '../src/framework/i18n';
 
 describe('i18n', () => {
   test('t returns key for missing string', () => {

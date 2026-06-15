@@ -2,7 +2,7 @@ import * as net from 'net';
 import { encode, decode, MsgType, WireMsg } from './protocol';
 import { loadGameClasses } from '../lobby/session';
 import { t } from '../i18n';
-import type { BaseGame } from '../games/base';
+import type { BaseGame } from '../../games/base';
 
 export class Host {
   readonly port: number;

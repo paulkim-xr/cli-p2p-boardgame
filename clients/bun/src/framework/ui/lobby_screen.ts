@@ -3,7 +3,7 @@ import { GAMES } from '../lobby/session';
 import { t } from '../i18n';
 import type { SessionInfo } from '../lobby/discovery';
 import type { ChatEntry } from '../chat';
-import type { BaseGame } from '../games/base';
+import type { BaseGame } from '../../games/base';
 
 export function showLobby(sessions: SessionInfo[], _myName: string, chatLog: ChatEntry[]): void {
   header(t('lobby.title'));
