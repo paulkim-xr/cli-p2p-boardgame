@@ -9,6 +9,13 @@ def full_setup(g):
         g.apply_move('bob',   {'place': {'ship': i, 'row': i, 'col': 0, 'horiz': True}})
 
 
+def make_placed():
+    g = Battleship()
+    g.start(['alice', 'bob'])
+    full_setup(g)
+    return g
+
+
 def test_placement_phase():
     g = Battleship()
     g.start(['alice', 'bob'])
@@ -59,3 +66,43 @@ def test_game_over_all_sunk():
             g._shots['alice'][cell] = 'hit'
     done, _ = g.is_over()
     assert done
+
+
+def test_load_state_restores_phase():
+    g = make_placed()
+    state = g.get_state('alice')
+    g2 = Battleship()
+    g2.start(['alice', 'bob'])
+    g2.load_state(state, 'alice')
+    assert g2._phase == 'battle'
+
+
+def test_parse_input_place_h():
+    g = Battleship()
+    g.start(['alice', 'bob'])
+    assert g.parse_input('3 4 h') == {'place': {'row': 3, 'col': 4, 'horiz': True}}
+
+
+def test_parse_input_place_v():
+    g = Battleship()
+    g.start(['alice', 'bob'])
+    assert g.parse_input('3 4 v') == {'place': {'row': 3, 'col': 4, 'horiz': False}}
+
+
+def test_parse_input_shot():
+    g = Battleship()
+    g.start(['alice', 'bob'])
+    g._phase = 'battle'
+    assert g.parse_input('5 6') == {'shot': {'row': 5, 'col': 6}}
+
+
+def test_parse_input_invalid():
+    g = Battleship()
+    g.start(['alice', 'bob'])
+    assert g.parse_input('abc') is None
+
+
+def test_get_help_nonempty():
+    g = Battleship()
+    g.start(['alice', 'bob'])
+    assert len(g.get_help()) >= 3

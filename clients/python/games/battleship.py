@@ -1,3 +1,4 @@
+from typing import List, Optional
 from games.base import BaseGame
 from framework.i18n import t
 
@@ -122,13 +123,78 @@ class Battleship(BaseGame):
                 lines.append(row)
         return '\n'.join(lines)
 
-    def get_state(self, perspective=None):
+    def get_state(self, perspective: Optional[str] = None) -> dict:
         opp = next((p for p in self.players if p != perspective), None)
         return {
             'phase': self._phase,
             'turn': self.current_turn(),
+            'players': self.players,
             'own_ships': [list(c) for s in self._ships.get(perspective, []) for c in s],
             'my_shots': {f'{r},{c}': v for (r, c), v in self._shots.get(perspective, {}).items()},
             'opp_shots': ({f'{r},{c}': v for (r, c), v in self._shots.get(opp, {}).items()}
                           if opp else {}),
         }
+
+    def load_state(self, data: dict, perspective: Optional[str] = None) -> None:
+        if not data:
+            return
+        if 'phase' in data:
+            self._phase = data['phase']
+        if 'players' in data:
+            self.players = list(data['players'])
+            for p in self.players:
+                if p not in self._ships:
+                    self._ships[p] = []
+                    self._placed[p] = 0
+                    self._shots[p] = {}
+        if 'turn' in data and data['turn'] in self.players:
+            self._turn_idx = self.players.index(data['turn'])
+        if 'own_ships' in data and perspective in self.players:
+            flat = [tuple(c) for c in data['own_ships']]
+            ship_sizes = [5, 4, 3, 3, 2]
+            ships, i = [], 0
+            for size in ship_sizes:
+                ships.append(set(flat[i:i + size]))
+                i += size
+            self._ships[perspective] = ships
+            self._placed[perspective] = len(ships)
+        if 'my_shots' in data and perspective in self.players:
+            self._shots[perspective] = {
+                tuple(int(x) for x in k.split(',')): v
+                for k, v in data['my_shots'].items()
+            }
+
+    def parse_input(self, raw: str) -> Optional[dict]:
+        import json as _json
+        raw = raw.strip()
+        if raw.startswith('{'):
+            try:
+                obj = _json.loads(raw)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                pass
+        parts = raw.split()
+        if len(parts) == 3:
+            try:
+                r, c = int(parts[0]), int(parts[1])
+                horiz = parts[2].lower() != 'v'
+                return {'place': {'row': r, 'col': c, 'horiz': horiz}}
+            except ValueError:
+                return None
+        if len(parts) == 2:
+            try:
+                r, c = int(parts[0]), int(parts[1])
+                if self._phase == 'place':
+                    return {'place': {'row': r, 'col': c, 'horiz': True}}
+                return {'shot': {'row': r, 'col': c}}
+            except ValueError:
+                pass
+        return None
+
+    def get_help(self) -> List[str]:
+        return [
+            'Place ships secretly, then take turns calling coordinates to sink them.',
+            'Place ship: <row> <col> <h|v>   e.g. "3 4 h"  (or "3 4 v" for vertical)',
+            'Shoot:      <row> <col>          e.g. "3 4"',
+        ]
