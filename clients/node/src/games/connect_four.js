@@ -99,6 +99,22 @@ class ConnectFour extends BaseGame {
       this._turnIdx = idx >= 0 ? idx : 0;
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const n = Number(trimmed.split(/\s+/)[0]);
+    return isNaN(n) ? null : { col: n };
+  }
+
+  getHelp() {
+    return [
+      'Drop a piece into a column. First to connect 4 in a row wins.',
+      'Move: <col>   e.g. "3"',
+    ];
+  }
 }
 
 module.exports = { ConnectFour };

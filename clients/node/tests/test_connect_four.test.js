@@ -55,3 +55,27 @@ test('render shows board', () => {
   assert.ok(out.includes('0'));
   assert.ok(out.includes('.'));
 });
+
+test('connect_four parseInput valid "3"', () => {
+  const g = new ConnectFour();
+  const result = g.parseInput('3');
+  assert.deepStrictEqual(result, { col: 3 });
+});
+
+test('connect_four parseInput valid JSON', () => {
+  const g = new ConnectFour();
+  const result = g.parseInput('{"col":5}');
+  assert.deepStrictEqual(result, { col: 5 });
+});
+
+test('connect_four parseInput invalid returns null', () => {
+  const g = new ConnectFour();
+  assert.strictEqual(g.parseInput('abc'), null);
+});
+
+test('connect_four getHelp returns array of length >= 2', () => {
+  const g = new ConnectFour();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});
