@@ -58,3 +58,33 @@ test('render contains board', () => {
   assert.ok(out.includes('.'));
   assert.ok(out.includes('9'));
 });
+
+test('go parseInput "3 4"', () => {
+  const g = new Go();
+  const result = g.parseInput('3 4');
+  assert.deepStrictEqual(result, { row: 3, col: 4 });
+});
+
+test('go parseInput "pass"', () => {
+  const g = new Go();
+  const result = g.parseInput('pass');
+  assert.deepStrictEqual(result, { pass: true });
+});
+
+test('go parseInput "PASS" case-insensitive', () => {
+  const g = new Go();
+  const result = g.parseInput('PASS');
+  assert.deepStrictEqual(result, { pass: true });
+});
+
+test('go parseInput invalid returns null', () => {
+  const g = new Go();
+  assert.strictEqual(g.parseInput('x y'), null);
+});
+
+test('go getHelp returns array of length >= 2', () => {
+  const g = new Go();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});

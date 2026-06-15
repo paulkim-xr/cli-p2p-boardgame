@@ -174,6 +174,28 @@ class Go extends BaseGame {
       this._turnIdx = idx >= 0 ? idx : 0;
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.toLowerCase() === 'pass') return { pass: true };
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const row = Number(parts[0]), col = Number(parts[1]);
+      if (!isNaN(row) && !isNaN(col)) return { row, col };
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Place stones to surround territory on a 9x9 board. Ko rule enforced.',
+      'Higher score (territory + captures) wins.',
+      'Move: <row> <col>   e.g. "3 4"   or   "pass"',
+    ];
+  }
 }
 
 module.exports = { Go };
