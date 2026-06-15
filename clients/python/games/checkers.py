@@ -1,5 +1,7 @@
+from typing import List, Optional
 from games.base import BaseGame
 from framework.i18n import t
+import json
 
 
 class Checkers(BaseGame):
@@ -116,6 +118,44 @@ class Checkers(BaseGame):
             lines.append(f'{i} ' + ' '.join(syms.get(c, '.') for c in row))
         return '\n'.join(lines)
 
-    def get_state(self, perspective=None):
+    def get_state(self, perspective: Optional[str] = None) -> dict:
         return {'board': [[list(c) if c else None for c in r] for r in self.board],
                 'turn': self.current_turn(), 'players': self.players}
+
+    def load_state(self, data: dict, perspective: Optional[str] = None) -> None:
+        if not data:
+            return
+        if 'players' in data:
+            self.players = list(data['players'])
+        if 'board' in data:
+            self.board = [
+                [tuple(c) if c else None for c in row]
+                for row in data['board']
+            ]
+        if 'turn' in data and data['turn'] in self.players:
+            self._turn_idx = self.players.index(data['turn'])
+
+    def parse_input(self, raw: str) -> Optional[dict]:
+        raw = raw.strip()
+        if raw.startswith('{'):
+            try:
+                obj = json.loads(raw)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                pass
+        parts = raw.split()
+        if len(parts) == 4:
+            try:
+                nums = [int(p) for p in parts]
+                return {'from': [nums[0], nums[1]], 'to': [nums[2], nums[3]]}
+            except ValueError:
+                pass
+        return None
+
+    def get_help(self) -> List[str]:
+        return [
+            'Jump over opponent pieces to capture them. Multi-jump if possible.',
+            'Reach the far end to become a king (can move backwards).',
+            'Move: <fromRow> <fromCol> <toRow> <toCol>   e.g. "2 3 4 5"',
+        ]
