@@ -41,3 +41,34 @@ test('render contains grid', () => {
   assert.ok(out.includes('B') || out.includes('W'));
   assert.ok(out.includes('.'));
 });
+
+test('othello parseInput "3 4"', () => {
+  const g = new Othello();
+  const result = g.parseInput('3 4');
+  assert.deepStrictEqual(result, { row: 3, col: 4 });
+});
+
+test('othello parseInput "pass"', () => {
+  const g = new Othello();
+  const result = g.parseInput('pass');
+  assert.deepStrictEqual(result, { pass: true });
+});
+
+test('othello parseInput "PASS" case-insensitive', () => {
+  const g = new Othello();
+  const result = g.parseInput('PASS');
+  assert.deepStrictEqual(result, { pass: true });
+});
+
+test('othello parseInput invalid returns null', () => {
+  const g = new Othello();
+  assert.strictEqual(g.parseInput('x y'), null);
+  assert.strictEqual(g.parseInput(''), null);
+});
+
+test('othello getHelp returns array of length >= 2', () => {
+  const g = new Othello();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});
