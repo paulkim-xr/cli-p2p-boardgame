@@ -191,6 +191,33 @@ class Quoridor extends BaseGame {
       this._turnIdx = idx >= 0 ? idx : 0;
     }
   }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 1 && /^[nsewNSEW]$/.test(parts[0])) {
+      return { move: parts[0].toUpperCase() };
+    }
+    if (parts.length === 3) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        return { wall: { row: r, col: c, horiz: parts[2].toLowerCase() === 'h' } };
+      }
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Race your pawn to the opposite side of the 9x9 board.',
+      'Place walls to block opponents, but never seal off someone completely.',
+      'Move pawn: n / s / e / w   e.g. "s"',
+      'Place wall: <row> <col> <h|v>   e.g. "3 2 h"  (or "3 2 v" for vertical)',
+    ];
+  }
 }
 
 module.exports = { Quoridor };
