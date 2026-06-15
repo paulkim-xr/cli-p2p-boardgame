@@ -81,3 +81,25 @@ def test_stalemate_no_winner():
     g._winner = None
     done, winner = g.is_over()
     assert done and winner is None
+
+
+def test_load_state_restores_board():
+    g = make()
+    state = g.get_state()
+    g2 = Chess()
+    g2.start(['alice', 'bob'])
+    g2.load_state(state)
+    assert g2.current_turn() == 'alice'
+    assert ('w', 'K') in g2.board.values()
+
+
+def test_parse_input_from_to():
+    assert make().parse_input('e2 e4') == {'from': 'e2', 'to': 'e4'}
+
+
+def test_parse_input_invalid():
+    assert make().parse_input('xyz') is None
+
+
+def test_get_help_nonempty():
+    assert len(make().get_help()) >= 2
