@@ -53,3 +53,28 @@ test('nim getState', () => {
   assert.deepStrictEqual(s.piles, [3, 5, 7]);
   assert.strictEqual(s.turn, 'alice');
 });
+
+test('nim parseInput valid "0 2"', () => {
+  const g = new Nim();
+  const result = g.parseInput('0 2');
+  assert.deepStrictEqual(result, { pile: 0, count: 2 });
+});
+
+test('nim parseInput valid JSON', () => {
+  const g = new Nim();
+  const result = g.parseInput('{"pile":1,"count":3}');
+  assert.deepStrictEqual(result, { pile: 1, count: 3 });
+});
+
+test('nim parseInput invalid returns null', () => {
+  const g = new Nim();
+  assert.strictEqual(g.parseInput('bad input'), null);
+  assert.strictEqual(g.parseInput(''), null);
+});
+
+test('nim getHelp returns array of length >= 2', () => {
+  const g = new Nim();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});
