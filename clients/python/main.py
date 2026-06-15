@@ -2,7 +2,6 @@
 """CLI P2P Board Game Framework — Python client"""
 
 import sys
-import threading
 import time
 from types import SimpleNamespace
 
@@ -43,9 +42,14 @@ def _run_game(ip: str, port: int, name: str, chat_log: ChatLog) -> None:
         {'type': MsgType.MOVE, 'from': name, 'data': data})
     engine.send_chat = lambda text: client_obj.send(
         {'type': MsgType.CHAT, 'from': name, 'text': text})
-    client_obj.connect()
+    try:
+        client_obj.connect()
+    except OSError as exc:
+        print(f'\n  Could not connect to {ip}:{port} — {exc}\n')
+        return
     time.sleep(0.2)
     engine.run()
+    client_obj.disconnect()
 
 
 def main() -> None:
@@ -73,8 +77,8 @@ def main() -> None:
         ch = getch().lower()
 
         if ch == 't':
-            msg = prompt_chat(name)
-            # pre-game chat: no client yet, so just discard
+            print('\n  Chat not available in lobby (no active connection)\n')
+            time.sleep(1)
 
         elif ch == 'h':
             game_name, max_players = prompt_host(name)
@@ -92,6 +96,7 @@ def main() -> None:
             beacon.start()
             _run_game('127.0.0.1', port, name, chat_log)
             beacon.stop()
+            host_obj.stop()
 
         elif ch == 'j':
             sid = prompt_join(sessions)
