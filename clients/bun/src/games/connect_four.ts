@@ -1,14 +1,12 @@
-import { BaseGame } from './base';
-import { t } from '../i18n';
+import { BaseGameImpl } from './base';
+import { t } from '../framework/i18n';
 
 const ROWS = 6;
 const COLS = 7;
 
-export class ConnectFour extends BaseGame {
+export class ConnectFour extends BaseGameImpl {
   board: (string | null)[][];
   private _turnIdx = 0;
-  private _over = false;
-  private _winner: string | null = null;
 
   constructor() {
     super();
@@ -75,7 +73,23 @@ export class ConnectFour extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return { board: this.board, turn: this.currentTurn(), players: this.players };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const n = Number(trimmed.split(/\s+/)[0]);
+    return isNaN(n) ? null : { col: n };
+  }
+
+  getHelp(): string[] {
+    return [
+      'Drop a piece into a column. First to connect 4 in a row wins.',
+      'Move: <col>   e.g. "3"',
+    ];
   }
 }

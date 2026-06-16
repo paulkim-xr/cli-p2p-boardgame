@@ -1,10 +1,10 @@
-import { BaseGame } from './base';
-import { t } from '../i18n';
+import { BaseGameImpl } from './base';
+import { t } from '../framework/i18n';
 
 const SHIP_SIZES = [5, 4, 3, 3, 2];
 const GRID = 10;
 
-export class Battleship extends BaseGame {
+export class Battleship extends BaseGameImpl {
   private _phase: 'place' | 'battle' = 'place';
   private _ships: Record<string, Set<string>[]> = {};
   private _placed: Record<string, number> = {};
@@ -123,15 +123,46 @@ export class Battleship extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(perspective: string): unknown {
-    const opp = this.players.find(p => p !== perspective) ?? null;
+  getState(perspective?: string): Record<string, unknown> {
+    const p = perspective ?? this.players[0] ?? '';
+    const opp = this.players.find(pl => pl !== p) ?? null;
     const shotsObj = (m: Map<string, 'hit' | 'miss'>) => Object.fromEntries([...m]);
     return {
       phase: this._phase,
       turn: this.currentTurn(),
-      ownShips: this._ships[perspective] ? this._ships[perspective].flatMap(s => [...s]) : [],
-      myShots: shotsObj(this._shots[perspective] ?? new Map()),
+      ownShips: this._ships[p] ? this._ships[p].flatMap(s => [...s]) : [],
+      myShots: shotsObj(this._shots[p] ?? new Map()),
       oppShots: opp ? shotsObj(this._shots[opp] ?? new Map()) : {},
     };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 3) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        return { place: { row: r, col: c, horiz: parts[2].toLowerCase() !== 'v' } };
+      }
+    }
+    if (parts.length === 2) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        if (this._phase === 'place') return { place: { row: r, col: c, horiz: true } };
+        return { shot: { row: r, col: c } };
+      }
+    }
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Place ships secretly, then take turns calling coordinates to sink them.',
+      'Place ship: <row> <col> <h|v>   e.g. "3 4 h"  (or "3 4 v" for vertical)',
+      'Shoot:      <row> <col>          e.g. "3 4"',
+    ];
   }
 }

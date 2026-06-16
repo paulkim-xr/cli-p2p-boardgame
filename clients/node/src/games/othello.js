@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 const SIZE = 8;
 const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
@@ -116,6 +116,38 @@ class Othello extends BaseGame {
 
   getState(perspective) {
     return { board: this.board, turn: this.currentTurn(), players: this.players };
+  }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.board) this.board = data.board.map(row => [...row]);
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.toLowerCase() === 'pass') return { pass: true };
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const row = Number(parts[0]), col = Number(parts[1]);
+      if (!isNaN(row) && !isNaN(col)) return { row, col };
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Place a disc to flip opponent pieces sandwiched between yours.',
+      'Player with the most discs when the board is full wins.',
+      'Move: <row> <col>   e.g. "3 4"   or   "pass"',
+    ];
   }
 }
 

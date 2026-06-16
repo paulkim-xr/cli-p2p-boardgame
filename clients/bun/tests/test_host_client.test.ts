@@ -1,9 +1,9 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import * as net from 'net';
-import { Host } from '../src/net/host';
-import { Client } from '../src/net/client';
-import { MsgType } from '../src/net/protocol';
-import type { WireMsg } from '../src/net/protocol';
+import { Host } from '../src/framework/net/host';
+import { Client } from '../src/framework/net/client';
+import { MsgType } from '../src/framework/net/protocol';
+import type { WireMsg } from '../src/framework/net/protocol';
 
 function freePort(): Promise<number> {
   return new Promise((resolve) => {

@@ -1,5 +1,6 @@
 from games.base import BaseGame
-from i18n import t
+from framework.i18n import t
+from typing import Optional, List
 
 SIZE = 11
 
@@ -77,6 +78,40 @@ class Hex(BaseGame):
             lines.append(' ' * i + ' '.join(syms.get(c, '.') for c in row))
         return '\n'.join(lines)
 
-    def get_state(self, perspective=None):
-        return {'board': self.board, 'turn': self.current_turn(),
-                'players': self.players}
+    def get_state(self, perspective=None) -> dict:
+        return {'board': [row[:] for row in self.board],
+                'turn': self.current_turn(), 'players': self.players}
+
+    def load_state(self, data: dict, perspective=None) -> None:
+        if not data:
+            return
+        if 'players' in data:
+            self.players = list(data['players'])
+        if 'board' in data:
+            self.board = [list(row) for row in data['board']]
+        if 'turn' in data and data['turn'] in self.players:
+            self._turn_idx = self.players.index(data['turn'])
+
+    def parse_input(self, raw: str) -> Optional[dict]:
+        import json as _json
+        raw = raw.strip()
+        if raw.startswith('{'):
+            try:
+                obj = _json.loads(raw)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                pass
+        parts = raw.split()
+        if len(parts) == 2:
+            try:
+                return {'row': int(parts[0]), 'col': int(parts[1])}
+            except ValueError:
+                pass
+        return None
+
+    def get_help(self) -> List[str]:
+        return [
+            'Connect your two opposite sides of the 11×11 board. No draws.',
+            'Move: <row> <col>   e.g. "3 4"',
+        ]

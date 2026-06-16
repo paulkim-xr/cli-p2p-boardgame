@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 const MAX_GUESSES = 10;
 
@@ -98,6 +98,45 @@ class Mastermind extends BaseGame {
       state.code = this._code;
     }
     return state;
+  }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.guesses) this._guesses = data.guesses.map(g => [...g]);
+    if (data.over != null) this._over = data.over;
+    if (data.code) this._code = [...data.code];
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    let digits = null;
+    if (parts.length === 4) {
+      const nums = parts.map(Number);
+      if (nums.every(n => !isNaN(n))) digits = nums;
+    } else if (parts.length === 1 && /^\d{4}$/.test(parts[0])) {
+      digits = parts[0].split('').map(Number);
+    }
+    if (digits && digits.length === 4) {
+      return this._code === null ? { code: digits } : { guess: digits };
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Guess the secret 4-digit code (digits 1-6).',
+      'B = right digit + right position.  W = right digit, wrong position.',
+      'Move: <d1> <d2> <d3> <d4>   e.g. "1 2 3 4"  or  "1234"',
+    ];
   }
 }
 

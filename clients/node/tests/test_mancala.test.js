@@ -50,3 +50,27 @@ test('render contains player names', () => {
   assert.ok(out.includes('alice'));
   assert.ok(out.includes('bob'));
 });
+
+test('mancala parseInput "2"', () => {
+  const g = new Mancala();
+  const result = g.parseInput('2');
+  assert.deepStrictEqual(result, { pit: 2 });
+});
+
+test('mancala parseInput valid JSON', () => {
+  const g = new Mancala();
+  const result = g.parseInput('{"pit":3}');
+  assert.deepStrictEqual(result, { pit: 3 });
+});
+
+test('mancala parseInput invalid returns null', () => {
+  const g = new Mancala();
+  assert.strictEqual(g.parseInput('abc'), null);
+});
+
+test('mancala getHelp returns array of length >= 2', () => {
+  const g = new Mancala();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});

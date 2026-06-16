@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 const SIZE = 9;
 const DIRS = { N: [-1, 0], S: [1, 0], E: [0, 1], W: [0, -1] };
@@ -172,9 +172,51 @@ class Quoridor extends BaseGame {
     return {
       pos: Object.fromEntries(Object.entries(this.pos).map(([p, v]) => [p, [...v]])),
       wallsLeft: { ...this.wallsLeft },
+      hWalls: [...this._hWalls],
+      vWalls: [...this._vWalls],
       turn: this.currentTurn(),
       players: this.players,
     };
+  }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.pos) this.pos = Object.fromEntries(Object.entries(data.pos).map(([p, v]) => [p, [...v]]));
+    if (data.wallsLeft) this.wallsLeft = { ...data.wallsLeft };
+    if (data.hWalls) this._hWalls = new Set(data.hWalls);
+    if (data.vWalls) this._vWalls = new Set(data.vWalls);
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 1 && /^[nsewNSEW]$/.test(parts[0])) {
+      return { move: parts[0].toUpperCase() };
+    }
+    if (parts.length === 3) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        return { wall: { row: r, col: c, horiz: parts[2].toLowerCase() === 'h' } };
+      }
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Race your pawn to the opposite side of the 9x9 board.',
+      'Place walls to block opponents, but never seal off someone completely.',
+      'Move pawn: n / s / e / w   e.g. "s"',
+      'Place wall: <row> <col> <h|v>   e.g. "3 2 h"  (or "3 2 v" for vertical)',
+    ];
   }
 }
 

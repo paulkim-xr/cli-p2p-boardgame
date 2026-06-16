@@ -1,5 +1,6 @@
+from typing import List, Optional
 from games.base import BaseGame
-from i18n import t
+from framework.i18n import t
 
 
 class Chess(BaseGame):
@@ -237,11 +238,50 @@ class Chess(BaseGame):
         lines.append(t('chess.turn', player=self.current_turn()))
         return '\n'.join(lines)
 
-    def get_state(self, perspective=None):
+    def get_state(self, perspective: Optional[str] = None) -> dict:
         return {
             'board': {s: list(p) for s, p in self.board.items()},
             'turn': self.current_turn(),
             'players': self.players,
+            'castle': self._castle,
+            'en_passant': self._en_passant,
             'check': (self._in_check(self._cmap.get(self.current_turn(), 'w'))
                       if not self._over else False),
         }
+
+    def load_state(self, data: dict, perspective: Optional[str] = None) -> None:
+        if not data:
+            return
+        if 'board' in data:
+            self.board = {sq: tuple(p) for sq, p in data['board'].items()}
+        if 'players' in data:
+            self.players = list(data['players'])
+            if len(self.players) == 2:
+                self._cmap = {self.players[0]: 'w', self.players[1]: 'b'}
+        if 'turn' in data and data['turn'] in self.players:
+            self._turn_idx = self.players.index(data['turn'])
+        if 'castle' in data:
+            self._castle = data['castle']
+        if 'en_passant' in data:
+            self._en_passant = data['en_passant']
+
+    def parse_input(self, raw: str) -> Optional[dict]:
+        import json as _json
+        raw = raw.strip()
+        if raw.startswith('{'):
+            try:
+                obj = _json.loads(raw)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                pass
+        parts = raw.split()
+        if len(parts) == 2:
+            return {'from': parts[0], 'to': parts[1]}
+        return None
+
+    def get_help(self) -> List[str]:
+        return [
+            'Standard chess. Castling, en passant, and promotion all supported.',
+            'Move: <from> <to>   e.g. "e2 e4"   castle: "e1 g1"',
+        ]

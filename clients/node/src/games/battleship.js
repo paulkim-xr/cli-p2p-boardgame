@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 const SHIP_SIZES = [5, 4, 3, 3, 2];
 const GRID = 10;
@@ -93,6 +93,7 @@ class Battleship extends BaseGame {
   }
 
   isOver() {
+    if (this._over) return [true, this._winner];
     if (this._phase !== 'battle') return [false, null];
     for (let i = 0; i < this.players.length; i++) {
       const opp = this.players[1 - i];
@@ -144,6 +145,60 @@ class Battleship extends BaseGame {
       myShots: shotsObj(this._shots[perspective] || new Map()),
       oppShots: opp ? shotsObj(this._shots[opp] || new Map()) : {},
     };
+  }
+
+  loadState(data, perspective) {
+    if (!data) return;
+    if (data.phase != null) this._phase = data.phase;
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      if (idx >= 0) {
+        if (this._phase === 'place') this._placeTurn = idx;
+        else this._turnIdx = idx;
+      }
+    }
+    if (perspective && this.players.includes(perspective)) {
+      const opp = this.players.find(p => p !== perspective);
+      if (data.ownShips) {
+        this._ships[perspective] = [new Set(data.ownShips)];
+      }
+      if (data.myShots) {
+        this._shots[perspective] = new Map(Object.entries(data.myShots));
+      }
+      if (opp && data.oppShots) {
+        this._shots[opp] = new Map(Object.entries(data.oppShots));
+      }
+    }
+  }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 3) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        return { place: { row: r, col: c, horiz: parts[2].toLowerCase() !== 'v' } };
+      }
+    }
+    if (parts.length === 2) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        if (this._phase === 'place') return { place: { row: r, col: c, horiz: true } };
+        return { shot: { row: r, col: c } };
+      }
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Place ships secretly, then take turns calling coordinates to sink them.',
+      'Place ship: <row> <col> <h|v>   e.g. "3 4 h"  (or "3 4 v" for vertical)',
+      'Shoot:      <row> <col>          e.g. "3 4"',
+    ];
   }
 }
 

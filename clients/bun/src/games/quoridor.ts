@@ -1,17 +1,15 @@
-import { BaseGame } from './base';
-import { t } from '../i18n';
+import { BaseGameImpl } from './base';
+import { t } from '../framework/i18n';
 
 const SIZE = 9;
 const DIRS: Record<string, [number, number]> = { N: [-1, 0], S: [1, 0], E: [0, 1], W: [0, -1] };
 
-export class Quoridor extends BaseGame {
+export class Quoridor extends BaseGameImpl {
   pos: Record<string, [number, number]> = {};
   wallsLeft: Record<string, number> = {};
   private _hWalls: Set<string> = new Set();
   private _vWalls: Set<string> = new Set();
   private _turnIdx = 0;
-  private _over = false;
-  private _winner: string | null = null;
 
   start(players: string[]): void {
     this.players = players;
@@ -128,12 +126,39 @@ export class Quoridor extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return {
       pos: Object.fromEntries(Object.entries(this.pos).map(([p, v]) => [p, [...v]])),
       wallsLeft: { ...this.wallsLeft },
       turn: this.currentTurn(),
       players: this.players,
     };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 1 && /^[nsewNSEW]$/.test(parts[0])) {
+      return { move: parts[0].toUpperCase() };
+    }
+    if (parts.length === 3) {
+      const r = Number(parts[0]), c = Number(parts[1]);
+      if (!isNaN(r) && !isNaN(c)) {
+        return { wall: { row: r, col: c, horiz: parts[2].toLowerCase() === 'h' } };
+      }
+    }
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Race your pawn to the opposite side of the 9×9 board.',
+      'Place walls to block opponents, but never seal off someone completely.',
+      'Move pawn: n / s / e / w   e.g. "s"',
+      'Place wall: <row> <col> <h|v>   e.g. "3 2 h"  (or "3 2 v" for vertical)',
+    ];
   }
 }

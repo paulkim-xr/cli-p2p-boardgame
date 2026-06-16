@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 class Chess extends BaseGame {
   constructor() {
@@ -276,6 +276,41 @@ class Chess extends BaseGame {
       players: this.players,
       check: !this._over ? this._inCheck(this._cmap[this.currentTurn()] || 'w') : false,
     };
+  }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) {
+      this.players = data.players;
+      this._cmap = { [data.players[0]]: 'w', [data.players[1]]: 'b' };
+    }
+    if (data.board) {
+      this.board = {};
+      for (const [sq, piece] of Object.entries(data.board)) {
+        this.board[sq] = [...piece];
+      }
+    }
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) return { from: parts[0], to: parts[1] };
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Standard chess. Castling, en passant, and promotion all supported.',
+      'Move: <from> <to>   e.g. "e2 e4"   castle: "e1 g1"',
+    ];
   }
 }
 

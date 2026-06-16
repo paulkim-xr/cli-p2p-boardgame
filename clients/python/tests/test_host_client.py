@@ -1,9 +1,9 @@
 import sys, time
 sys.path.insert(0, 'clients/python')
 from tests.conftest import find_free_port
-from net.host import Host
-from net.client import Client
-from net.protocol import MsgType
+from framework.net.host import Host
+from framework.net.client import Client
+from framework.net.protocol import MsgType
 from games.nim import Nim
 
 

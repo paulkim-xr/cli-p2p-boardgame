@@ -1,15 +1,13 @@
-import { BaseGame } from './base';
-import { t } from '../i18n';
+import { BaseGameImpl } from './base';
+import { t } from '../framework/i18n';
 
 const PITS = 6;
 const SEEDS = 4;
 
-export class Mancala extends BaseGame {
+export class Mancala extends BaseGameImpl {
   pits: Record<string, number[]> = {};
   store: Record<string, number> = {};
   private _turnIdx = 0;
-  private _over = false;
-  private _winner: string | null = null;
 
   start(players: string[]): void {
     this.players = players;
@@ -83,12 +81,30 @@ export class Mancala extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return {
       pits: Object.fromEntries(this.players.map(p => [p, [...this.pits[p]]])),
       store: { ...this.store },
       turn: this.currentTurn(),
       players: this.players,
     };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const n = Number(trimmed.split(/\s+/)[0]);
+    return isNaN(n) ? null : { pit: n };
+  }
+
+  getHelp(): string[] {
+    return [
+      'Board shows  [0]:4  [1]:4  [2]:4  [3]:4  [4]:4  [5]:4  store=N',
+      'Pick a pit index 0–5 to sow its seeds counter-clockwise.',
+      'Land in your store → free turn.  Land in your own empty pit → capture opposite.',
+      'Move: <pit>   e.g. "2"',
+    ];
   }
 }

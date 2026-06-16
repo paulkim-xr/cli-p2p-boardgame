@@ -31,4 +31,20 @@ describe('Othello', () => {
     const out = g.render();
     expect(out.includes('B') || out.includes('W')).toBe(true);
   });
+
+  test('parseInput: row col', () => {
+    expect(g.parseInput('2 3')).toEqual({ row: 2, col: 3 });
+  });
+
+  test('parseInput: pass', () => {
+    expect(g.parseInput('pass')).toEqual({ pass: true });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

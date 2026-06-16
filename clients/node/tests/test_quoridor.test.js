@@ -50,3 +50,40 @@ test('render shows grid', () => {
   const out = g.render();
   assert.ok(out.includes('0') || out.includes('1'));
 });
+
+test('quoridor parseInput "s" returns move', () => {
+  const g = new Quoridor();
+  const result = g.parseInput('s');
+  assert.deepStrictEqual(result, { move: 'S' });
+});
+
+test('quoridor parseInput "N" returns move', () => {
+  const g = new Quoridor();
+  const result = g.parseInput('N');
+  assert.deepStrictEqual(result, { move: 'N' });
+});
+
+test('quoridor parseInput "3 2 h" returns wall', () => {
+  const g = new Quoridor();
+  const result = g.parseInput('3 2 h');
+  assert.deepStrictEqual(result, { wall: { row: 3, col: 2, horiz: true } });
+});
+
+test('quoridor parseInput "3 2 v" returns wall vertical', () => {
+  const g = new Quoridor();
+  const result = g.parseInput('3 2 v');
+  assert.deepStrictEqual(result, { wall: { row: 3, col: 2, horiz: false } });
+});
+
+test('quoridor parseInput invalid returns null', () => {
+  const g = new Quoridor();
+  assert.strictEqual(g.parseInput('xx'), null);
+  assert.strictEqual(g.parseInput(''), null);
+});
+
+test('quoridor getHelp returns array of length >= 2', () => {
+  const g = new Quoridor();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});

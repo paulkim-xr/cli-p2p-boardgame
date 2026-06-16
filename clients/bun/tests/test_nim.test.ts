@@ -36,4 +36,19 @@ describe('Nim', () => {
     expect(out).toContain('3');
     expect(out).toContain('alice');
   });
+
+  test('parseInput: space-separated pile count', () => {
+    expect(g.parseInput('0 2')).toEqual({ pile: 0, count: 2 });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+    expect(g.parseInput('0')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    const help = g.getHelp();
+    expect(help.length).toBeGreaterThan(0);
+    expect(typeof help[0]).toBe('string');
+  });
 });

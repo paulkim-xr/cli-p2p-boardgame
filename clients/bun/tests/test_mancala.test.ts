@@ -33,4 +33,16 @@ describe('Mancala', () => {
     expect(out).toContain('alice');
     expect(out).toContain('bob');
   });
+
+  test('parseInput: pit number', () => {
+    expect(g.parseInput('2')).toEqual({ pit: 2 });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

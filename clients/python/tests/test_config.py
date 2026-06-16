@@ -1,6 +1,6 @@
 import os, sys, json
 sys.path.insert(0, 'clients/python')
-import config
+from framework import config
 
 
 def test_default_port():

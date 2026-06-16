@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 class Go extends BaseGame {
   constructor(size = 9) {
@@ -162,6 +162,39 @@ class Go extends BaseGame {
       captures: { ...this._captures },
       players: this.players,
     };
+  }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.board) this.board = data.board.map(row => [...row]);
+    if (data.captures) this._captures = { ...data.captures };
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.toLowerCase() === 'pass') return { pass: true };
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const row = Number(parts[0]), col = Number(parts[1]);
+      if (!isNaN(row) && !isNaN(col)) return { row, col };
+    }
+    return null;
+  }
+
+  getHelp() {
+    return [
+      'Place stones to surround territory on a 9x9 board. Ko rule enforced.',
+      'Higher score (territory + captures) wins.',
+      'Move: <row> <col>   e.g. "3 4"   or   "pass"',
+    ];
   }
 }
 

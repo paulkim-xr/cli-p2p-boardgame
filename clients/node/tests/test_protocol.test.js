@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { MsgType, encode, decode } = require('../src/net/protocol');
+const { MsgType, encode, decode } = require('../src/framework/net/protocol');
 
 test('encode produces JSON line', () => {
   const msg = { type: MsgType.JOIN, from: 'alice' };

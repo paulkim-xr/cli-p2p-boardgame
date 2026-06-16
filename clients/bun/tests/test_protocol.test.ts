@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { MsgType, encode, decode } from '../src/net/protocol';
+import { MsgType, encode, decode } from '../src/framework/net/protocol';
 
 describe('protocol', () => {
   test('encode produces JSON line', () => {

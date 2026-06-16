@@ -1,7 +1,7 @@
-import { BaseGame } from './base';
-import { t } from '../i18n';
+import { BaseGameImpl } from './base';
+import { t } from '../framework/i18n';
 
-export class Nim extends BaseGame {
+export class Nim extends BaseGameImpl {
   piles: number[];
   private _turnIdx = 0;
 
@@ -51,7 +51,27 @@ export class Nim extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return { piles: [...this.piles], turn: this.currentTurn(), players: this.players };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const pile = Number(parts[0]), count = Number(parts[1]);
+      if (!isNaN(pile) && !isNaN(count)) return { pile, count };
+    }
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Take ≥1 stone from exactly one pile each turn. Last to take wins.',
+      'Move: <pile> <count>   e.g. "0 2"  (take 2 stones from pile 0)',
+    ];
   }
 }

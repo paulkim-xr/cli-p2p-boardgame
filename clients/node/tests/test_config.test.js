@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { loadPort, DEFAULT_PORT } = require('../src/config');
+const { loadPort, DEFAULT_PORT } = require('../src/framework/config');
 
 test('default port when no args', () => {
   assert.strictEqual(loadPort([]), DEFAULT_PORT);

@@ -58,3 +58,28 @@ test('render shows pieces', () => {
   const out = g.render();
   assert.ok(out.includes('r') || out.includes('b'));
 });
+
+test('checkers parseInput "2 3 4 5"', () => {
+  const g = new Checkers();
+  const result = g.parseInput('2 3 4 5');
+  assert.deepStrictEqual(result, { from: [2, 3], to: [4, 5] });
+});
+
+test('checkers parseInput valid JSON', () => {
+  const g = new Checkers();
+  const result = g.parseInput('{"from":[2,3],"to":[4,5]}');
+  assert.deepStrictEqual(result, { from: [2, 3], to: [4, 5] });
+});
+
+test('checkers parseInput invalid returns null', () => {
+  const g = new Checkers();
+  assert.strictEqual(g.parseInput('2 3'), null);
+  assert.strictEqual(g.parseInput('abc'), null);
+});
+
+test('checkers getHelp returns array of length >= 2', () => {
+  const g = new Checkers();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});

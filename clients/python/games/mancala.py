@@ -1,5 +1,6 @@
 from games.base import BaseGame
-from i18n import t
+from framework.i18n import t
+from typing import Optional, List
 
 PITS = 6
 SEEDS = 4
@@ -91,3 +92,38 @@ class Mancala(BaseGame):
         return {'pits': {p: self.pits[p][:] for p in self.players},
                 'store': dict(self.store), 'turn': self.current_turn(),
                 'players': self.players}
+
+    def load_state(self, data: dict, perspective=None) -> None:
+        if not data:
+            return
+        if 'players' in data:
+            self.players = list(data['players'])
+        if 'pits' in data:
+            self.pits = {p: list(v) for p, v in data['pits'].items()}
+        if 'store' in data:
+            self.store = dict(data['store'])
+        if 'turn' in data and data['turn'] in self.players:
+            self._turn_idx = self.players.index(data['turn'])
+
+    def parse_input(self, raw: str) -> Optional[dict]:
+        import json as _json
+        raw = raw.strip()
+        if raw.startswith('{'):
+            try:
+                obj = _json.loads(raw)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                pass
+        try:
+            return {'pit': int(raw.split()[0])}
+        except (ValueError, IndexError):
+            return None
+
+    def get_help(self) -> List[str]:
+        return [
+            'Board shows  [0]:4  [1]:4  [2]:4  [3]:4  [4]:4  [5]:4  store=N',
+            'Pick a pit index 0–5 to sow its seeds counter-clockwise.',
+            'Land in your store → free turn.  Land in your own empty pit → capture opposite.',
+            'Move: <pit>   e.g. "2"',
+        ]

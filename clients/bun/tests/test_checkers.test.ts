@@ -29,4 +29,17 @@ describe('Checkers', () => {
     expect(out).toContain('r');
     expect(out).toContain('b');
   });
+
+  test('parseInput: four numbers as from/to', () => {
+    expect(g.parseInput('5 0 4 1')).toEqual({ from: [5,0], to: [4,1] });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+    expect(g.parseInput('1 2 3')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

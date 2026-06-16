@@ -1,13 +1,11 @@
-import { BaseGame } from './base';
-import { t } from '../i18n';
+import { BaseGameImpl } from './base';
+import { t } from '../framework/i18n';
 
 const SIZE = 11;
 
-export class Hex extends BaseGame {
+export class Hex extends BaseGameImpl {
   board: (string | null)[][];
   private _turnIdx = 0;
-  private _over = false;
-  private _winner: string | null = null;
 
   constructor() {
     super();
@@ -69,7 +67,27 @@ export class Hex extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return { board: this.board, turn: this.currentTurn(), players: this.players };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const row = Number(parts[0]), col = Number(parts[1]);
+      if (!isNaN(row) && !isNaN(col)) return { row, col };
+    }
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Connect your two opposite sides of the 11×11 board. No draws.',
+      'Move: <row> <col>   e.g. "3 4"',
+    ];
   }
 }

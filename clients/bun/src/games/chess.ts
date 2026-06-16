@@ -1,17 +1,15 @@
-import { BaseGame } from './base';
-import { t } from '../i18n';
+import { BaseGameImpl } from './base';
+import { t } from '../framework/i18n';
 
 type Color = 'w' | 'b';
 type BoardPiece = [Color, string];
 
-export class Chess extends BaseGame {
+export class Chess extends BaseGameImpl {
   board: Record<string, BoardPiece>;
   private _cmap: Record<string, Color> = {};
   private _turnIdx = 0;
   private _castle: Record<Color, Record<string, boolean>>;
   private _enPassant: string | null = null;
-  private _over = false;
-  private _winner: string | null = null;
 
   constructor() {
     super();
@@ -229,12 +227,29 @@ export class Chess extends BaseGame {
     return lines.join('\n');
   }
 
-  getState(_perspective: string): unknown {
+  getState(_perspective?: string): Record<string, unknown> {
     return {
       board: Object.fromEntries(Object.entries(this.board).map(([s, p]) => [s, [...p]])),
       turn: this.currentTurn(),
       players: this.players,
       check: !this._over ? this._inCheck(this._cmap[this.currentTurn() ?? ''] ?? 'w') : false,
     };
+  }
+
+  parseInput(raw: string): Record<string, unknown> | null {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj as Record<string, unknown>; } catch {}
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) return { from: parts[0], to: parts[1] };
+    return null;
+  }
+
+  getHelp(): string[] {
+    return [
+      'Standard chess. Castling, en passant, and promotion all supported.',
+      'Move: <from> <to>   e.g. "e2 e4"   castle: "e1 g1"',
+    ];
   }
 }

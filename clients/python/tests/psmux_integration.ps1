@@ -16,9 +16,9 @@ Write-Host ""
 $hostScript = @"
 import sys, time, threading
 sys.path.insert(0, r'$root')
-from net.host import Host
-from net.client import Client
-from net.protocol import MsgType
+from framework.net.host import Host
+from framework.net.client import Client
+from framework.net.protocol import MsgType
 
 received = []
 
@@ -56,8 +56,8 @@ print('HOST done', flush=True)
 $joinScript = @"
 import sys, time, threading
 sys.path.insert(0, r'$root')
-from net.client import Client
-from net.protocol import MsgType
+from framework.net.client import Client
+from framework.net.protocol import MsgType
 
 received = []
 

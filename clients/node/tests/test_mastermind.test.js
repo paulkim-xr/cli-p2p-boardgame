@@ -52,3 +52,35 @@ test('invalid code rejected', () => {
   assert.ok(!g.validateMove('alice', { code: [1,2,3,7] }));
   assert.ok(!g.validateMove('alice', { code: [1,2,3] }));
 });
+
+test('mastermind parseInput returns code when no code set', () => {
+  const g = new Mastermind();
+  const result = g.parseInput('1 2 3 4');
+  assert.deepStrictEqual(result, { code: [1, 2, 3, 4] });
+});
+
+test('mastermind parseInput compact 4-digit string returns code', () => {
+  const g = new Mastermind();
+  const result = g.parseInput('1234');
+  assert.deepStrictEqual(result, { code: [1, 2, 3, 4] });
+});
+
+test('mastermind parseInput returns guess when code is set', () => {
+  const g = new Mastermind();
+  g._code = [1, 2, 3, 4];
+  const result = g.parseInput('5 6 5 6');
+  assert.deepStrictEqual(result, { guess: [5, 6, 5, 6] });
+});
+
+test('mastermind parseInput invalid returns null', () => {
+  const g = new Mastermind();
+  assert.strictEqual(g.parseInput('bad'), null);
+  assert.strictEqual(g.parseInput('1 2 3'), null);
+});
+
+test('mastermind getHelp returns array of length >= 2', () => {
+  const g = new Mastermind();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});

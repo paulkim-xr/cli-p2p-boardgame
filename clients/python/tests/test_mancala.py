@@ -49,3 +49,25 @@ def test_game_over_empty_rows():
     g.pits['bob'] = [0] * 6
     done, _ = g.is_over()
     assert done
+
+
+def test_load_state_restores():
+    g = make()
+    g.apply_move('alice', {'pit': 2})
+    state = g.get_state()
+    g2 = Mancala()
+    g2.start(['alice', 'bob'])
+    g2.load_state(state)
+    assert g2.current_turn() == g.current_turn()
+
+
+def test_parse_input_pit():
+    assert make().parse_input('2') == {'pit': 2}
+
+
+def test_parse_input_invalid():
+    assert make().parse_input('abc') is None
+
+
+def test_get_help_nonempty():
+    assert len(make().get_help()) >= 3

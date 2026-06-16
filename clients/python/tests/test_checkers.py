@@ -48,3 +48,21 @@ def test_king_promotion():
     g.board[7][7] = ('black', False)
     g.apply_move('red', {'from': [1, 0], 'to': [0, 1]})
     assert g.board[0][1] == ('red', True)
+
+
+def test_load_state_restores():
+    g = make()
+    state = g.get_state()
+    g2 = Checkers()
+    g2.start(['red', 'black'])
+    g2.load_state(state)
+    assert g2.current_turn() == 'red'
+
+def test_parse_input_four_numbers():
+    assert make().parse_input('2 3 4 5') == {'from': [2, 3], 'to': [4, 5]}
+
+def test_parse_input_invalid():
+    assert make().parse_input('abc') is None
+
+def test_get_help_nonempty():
+    assert len(make().get_help()) >= 2

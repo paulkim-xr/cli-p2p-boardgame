@@ -44,4 +44,22 @@ describe('Quoridor', () => {
     expect(done).toBe(true);
     expect(winner).toBe('alice');
   });
+
+  test('parseInput: pawn direction', () => {
+    expect(g.parseInput('s')).toEqual({ move: 'S' });
+    expect(g.parseInput('N')).toEqual({ move: 'N' });
+  });
+
+  test('parseInput: wall placement', () => {
+    expect(g.parseInput('3 2 h')).toEqual({ wall: { row: 3, col: 2, horiz: true } });
+    expect(g.parseInput('3 2 v')).toEqual({ wall: { row: 3, col: 2, horiz: false } });
+  });
+
+  test('parseInput: invalid returns null', () => {
+    expect(g.parseInput('abc')).toBeNull();
+  });
+
+  test('getHelp: returns non-empty array', () => {
+    expect(g.getHelp().length).toBeGreaterThan(0);
+  });
 });

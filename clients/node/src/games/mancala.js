@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 const { BaseGame } = require('./base');
-const { t } = require('../i18n');
+const { t } = require('../framework/i18n');
 
 const PITS = 6;
 const SEEDS = 4;
@@ -91,7 +91,8 @@ class Mancala extends BaseGame {
   render(perspective) {
     const lines = [t('mancala.title')];
     for (const p of this.players) {
-      lines.push(t('mancala.player_row', { player: p, pits: JSON.stringify(this.pits[p]), store: this.store[p] }));
+      const pitStr = this.pits[p].map((s, i) => `[${i}]:${s}`).join('  ');
+      lines.push(t('mancala.player_row', { player: p, pits: pitStr, store: this.store[p] }));
     }
     lines.push(t('mancala.turn', { player: this.currentTurn() }));
     return lines.join('\n');
@@ -104,6 +105,35 @@ class Mancala extends BaseGame {
       turn: this.currentTurn(),
       players: this.players,
     };
+  }
+
+  loadState(data) {
+    if (!data) return;
+    if (data.players) this.players = data.players;
+    if (data.pits) this.pits = Object.fromEntries(Object.entries(data.pits).map(([k, v]) => [k, [...v]]));
+    if (data.store) this.store = { ...data.store };
+    if (data.turn != null) {
+      const idx = this.players.indexOf(data.turn);
+      this._turnIdx = idx >= 0 ? idx : 0;
+    }
+  }
+
+  parseInput(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try { const obj = JSON.parse(trimmed); if (obj && typeof obj === 'object') return obj; } catch (_) {}
+    }
+    const n = Number(trimmed.split(/\s+/)[0]);
+    return isNaN(n) ? null : { pit: n };
+  }
+
+  getHelp() {
+    return [
+      'Board shows  [0]:4  [1]:4  [2]:4  [3]:4  [4]:4  [5]:4  store=N',
+      'Pick a pit index 0-5 to sow its seeds counter-clockwise.',
+      'Land in your store -> free turn.  Land in your own empty pit -> capture opposite.',
+      'Move: <pit>   e.g. "2"',
+    ];
   }
 }
 

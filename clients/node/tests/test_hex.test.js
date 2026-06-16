@@ -41,3 +41,28 @@ test('render has hex shape', () => {
   assert.ok(lines.length > 5);
   assert.ok(lines[1].startsWith('.') || lines[1].startsWith(' '));
 });
+
+test('hex parseInput "3 4"', () => {
+  const g = new Hex();
+  const result = g.parseInput('3 4');
+  assert.deepStrictEqual(result, { row: 3, col: 4 });
+});
+
+test('hex parseInput valid JSON', () => {
+  const g = new Hex();
+  const result = g.parseInput('{"row":5,"col":6}');
+  assert.deepStrictEqual(result, { row: 5, col: 6 });
+});
+
+test('hex parseInput invalid returns null', () => {
+  const g = new Hex();
+  assert.strictEqual(g.parseInput('abc'), null);
+  assert.strictEqual(g.parseInput('3'), null);
+});
+
+test('hex getHelp returns array of length >= 2', () => {
+  const g = new Hex();
+  const help = g.getHelp();
+  assert.ok(Array.isArray(help));
+  assert.ok(help.length >= 2);
+});
