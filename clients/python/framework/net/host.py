@@ -1,5 +1,5 @@
 import socket, threading
-from net.protocol import encode, decode, MsgType
+from framework.net.protocol import encode, decode, MsgType
 
 
 class Host:
@@ -62,7 +62,7 @@ class Host:
                     self.broadcast({'type': MsgType.PLAYER_LIST, 'players': players_now})
                     if (self.game is None and self._game_name and
                             len(players_now) >= self._max_players):
-                        from lobby.session import _load_game_classes
+                        from framework.lobby.session import _load_game_classes
                         classes = _load_game_classes()
                         if self._game_name in classes:
                             self.game = classes[self._game_name]()
@@ -91,11 +91,11 @@ class Host:
         player_id = msg['from']
         move_data = msg.get('data', {})
         if self.game.current_turn() != player_id:
-            from i18n import t
+            from framework.i18n import t
             self._send_to(player_id, {'type': MsgType.ERROR, 'message': t('error.not_your_turn')})
             return
         if not self.game.validate_move(player_id, move_data):
-            from i18n import t
+            from framework.i18n import t
             self._send_to(player_id, {'type': MsgType.ERROR, 'message': t('error.invalid_move')})
             return
         self.game.apply_move(player_id, move_data)

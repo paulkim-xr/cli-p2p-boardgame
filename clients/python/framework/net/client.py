@@ -1,5 +1,5 @@
 import socket, threading
-from net.protocol import encode, decode, MsgType
+from framework.net.protocol import encode, decode, MsgType
 
 
 class Client:
