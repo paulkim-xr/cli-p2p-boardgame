@@ -4,7 +4,7 @@ import json
 
 from framework.net.protocol import MsgType
 from framework.lobby.session import _load_game_classes
-from framework.ui.terminal import clear, header, DIM, BOLD, RESET
+from framework.ui.terminal import clear, header, read_line_with_refresh, DIM, BOLD, RESET
 from framework.ui.lobby_screen import render_game
 from framework.i18n import t
 
@@ -88,11 +88,22 @@ class GameEngine:
                 return
 
             if game.current_turn() == self.name:
-                raw = input(t('game.move_prompt')).strip()
+                def _snap_check():
+                    s = self._snap()
+                    if s != self._last_snap:
+                        clear()
+                        render_game(game, self.players, self.chat_log.recent(3), self.name)
+                        self._last_snap = s
+                        return True
+                    return False
+
+                raw = read_line_with_refresh(t('game.move_prompt'), on_check=_snap_check).strip()
                 if not raw:
                     self._last_snap = None
                     continue
                 cmd = raw.lower()
+                if cmd == 'q':
+                    return
                 if cmd == 't':
                     msg = input(t('game.chat_prompt')).strip()
                     if msg and self.send_chat:
@@ -116,6 +127,8 @@ class GameEngine:
                 self._last_snap = None
             else:
                 ch = self._peek_char()
+                if ch == 'q':
+                    return
                 if ch == 't':
                     msg = input(t('game.chat_prompt')).strip()
                     if msg and self.send_chat:

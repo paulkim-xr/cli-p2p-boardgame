@@ -58,3 +58,52 @@ def getch():
         return sys.stdin.read(1)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+
+def read_line_with_refresh(prompt: str, on_check=None) -> str:
+    """Read a line of input, calling on_check() every ~200ms.
+
+    If on_check returns True (snap changed and screen was re-rendered),
+    the prompt and accumulated buffer are redrawn. Windows-only polling;
+    falls back to plain input() on other platforms.
+    """
+    import time
+    if sys.platform != 'win32':
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+        return input()
+    import msvcrt
+    buf = ''
+    sys.stdout.write(prompt)
+    sys.stdout.flush()
+    last_check = time.monotonic()
+    while True:
+        if msvcrt.kbhit():
+            ch = msvcrt.getwch()
+            if ch in ('\r', '\n'):
+                sys.stdout.write('\n')
+                sys.stdout.flush()
+                return buf
+            elif ch in ('\x08', '\x7f'):  # backspace
+                if buf:
+                    buf = buf[:-1]
+                    sys.stdout.write('\b \b')
+                    sys.stdout.flush()
+            elif ch == '\x03':  # Ctrl+C
+                sys.stdout.write('\n')
+                sys.exit(0)
+            elif ch in ('\x00', '\xe0'):  # special key prefix (arrow keys etc.)
+                msvcrt.getwch()  # consume scan code
+            else:
+                ch_lower = ch.lower()
+                sys.stdout.write(ch_lower)
+                sys.stdout.flush()
+                buf += ch_lower
+        else:
+            time.sleep(0.02)
+            now = time.monotonic()
+            if now - last_check >= 0.2:
+                last_check = now
+                if on_check and on_check():
+                    sys.stdout.write(prompt + buf)
+                    sys.stdout.flush()

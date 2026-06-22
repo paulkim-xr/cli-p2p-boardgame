@@ -2,7 +2,7 @@
 
 const { MsgType } = require('./net/protocol');
 const { loadGameClasses } = require('./lobby/session');
-const { clear, header, question, getchTimeout, BOLD, RESET, DIM } = require('./ui/terminal');
+const { clear, header, question, getchTimeout, readLineWithRefresh, BOLD, RESET, DIM } = require('./ui/terminal');
 const { renderGame } = require('./ui/lobby_screen');
 const { t } = require('./i18n');
 
@@ -89,10 +89,20 @@ class GameEngine {
       }
 
       if (gameObj.currentTurn() === this.name) {
-        const raw = await question(t('game.move_prompt'));
+        const raw = await readLineWithRefresh(t('game.move_prompt'), () => {
+          const s = this._snap();
+          if (s !== this._lastSnap) {
+            clear();
+            renderGame(gameObj, this.players, this.chatLog.recent(3), this.name);
+            this._lastSnap = s;
+            return true;
+          }
+          return false;
+        });
         if (!raw.trim()) { this._lastSnap = null; continue; }
 
         const cmd = raw.trim().toLowerCase();
+        if (cmd === 'q') { return; }
         if (cmd === 't') {
           const msg = await question(t('game.chat_prompt'));
           if (msg.trim() && this.sendChat) {
@@ -120,6 +130,7 @@ class GameEngine {
         this._lastSnap = null;
       } else {
         const ch = await getchTimeout(150);
+        if (ch === 'q') { return; }
         if (ch === 't') {
           const msg = await question(t('game.chat_prompt'));
           if (msg.trim() && this.sendChat) {

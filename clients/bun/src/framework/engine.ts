@@ -1,6 +1,6 @@
 import { MsgType } from './net/protocol';
 import { loadGameClasses } from './lobby/session';
-import { clear, header, question, getchTimeout, BOLD, RESET, DIM } from './ui/terminal';
+import { clear, header, question, getchTimeout, readLineWithRefresh, BOLD, RESET, DIM } from './ui/terminal';
 import { renderGame } from './ui/lobby_screen';
 import { t } from './i18n';
 import type { ChatLog } from './chat';
@@ -91,10 +91,20 @@ export class GameEngine {
       }
 
       if (gameObj.currentTurn() === this.name) {
-        const raw = await question(t('game.move_prompt'));
+        const raw = await readLineWithRefresh(t('game.move_prompt'), () => {
+          const s = this._snap();
+          if (s !== this._lastSnap) {
+            clear();
+            renderGame(gameObj!, this.players, this.chatLog.recent(3), this.name);
+            this._lastSnap = s;
+            return true;
+          }
+          return false;
+        });
         if (!raw.trim()) { this._lastSnap = null; continue; }
 
         const cmd = raw.trim().toLowerCase();
+        if (cmd === 'q') { return; }
         if (cmd === 't') {
           const msg = await question(t('game.chat_prompt'));
           if (msg.trim() && this.sendChat) {
@@ -122,6 +132,7 @@ export class GameEngine {
         this._lastSnap = null;
       } else {
         const ch = await getchTimeout(150);
+        if (ch === 'q') { return; }
         if (ch === 't') {
           const msg = await question(t('game.chat_prompt'));
           if (msg.trim() && this.sendChat) {
