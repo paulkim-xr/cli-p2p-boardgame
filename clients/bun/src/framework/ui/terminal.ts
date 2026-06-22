@@ -75,3 +75,30 @@ export function getchTimeout(ms: number): Promise<string | null> {
     }
   });
 }
+
+// Reads a line of input character-by-character.
+// Calls onCheck() every ~200ms while waiting; if onCheck returns true
+// (snap changed and screen was re-rendered), the prompt+buffer are redrawn.
+export async function readLineWithRefresh(
+  prompt: string,
+  onCheck?: () => boolean
+): Promise<string> {
+  let buf = '';
+  process.stdout.write(prompt);
+  while (true) {
+    const ch = await getchTimeout(200);
+    if (onCheck && onCheck()) {
+      process.stdout.write(prompt + buf);
+    }
+    if (ch === null) continue;
+    if (ch === '\r' || ch === '\n') { process.stdout.write('\n'); return buf; }
+    if (ch === '\x7f' || ch === '\b') {
+      if (buf.length > 0) { buf = buf.slice(0, -1); process.stdout.write('\b \b'); }
+      continue;
+    }
+    if (ch === '\x03') { process.stdout.write('\n'); process.exit(0); }
+    if (ch.startsWith('\x1b')) continue;
+    process.stdout.write(ch);
+    buf += ch;
+  }
+}

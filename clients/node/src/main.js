@@ -21,6 +21,7 @@ async function runGame(ip, port, name, chatLog) {
   await clientObj.connect();
   await new Promise(r => setTimeout(r, 200));
   await engine.run();
+  clientObj.disconnect();
 }
 
 async function main() {
