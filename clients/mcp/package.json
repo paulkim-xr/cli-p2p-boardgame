@@ -1,0 +1,16 @@
+{
+  "name": "boardgame-mcp",
+  "version": "1.0.0",
+  "description": "MCP server — wire up any AI agent to play CLI board games",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
