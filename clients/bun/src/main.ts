@@ -9,15 +9,18 @@ import { ChatLog } from './framework/chat';
 import { clear, header, getch, question, enableAnsiWindows } from './framework/ui/terminal';
 import { showLobby, promptHost, promptJoin } from './framework/ui/lobby_screen';
 import { GameEngine } from './framework/engine';
+import { createGamePanel } from './framework/ui/panel';
 
 async function runGame(ip: string, port: number, name: string, chatLog: ChatLog): Promise<void> {
-  const engine = new GameEngine({ name, chatLog });
+  const panel = createGamePanel();
+  const engine = new GameEngine({ name, chatLog, panel });
   const clientObj = new Client(ip, port, name, (msg: any) => engine.onMessage(msg));
   engine.sendMove = (data: unknown) => clientObj.send({ type: MsgType.MOVE, from: name, data });
   engine.sendChat = (text: string) => clientObj.send({ type: MsgType.CHAT, from: name, text });
   await clientObj.connect();
   await Bun.sleep(200);
   await engine.run();
+  clear();
 }
 
 async function main(): Promise<void> {

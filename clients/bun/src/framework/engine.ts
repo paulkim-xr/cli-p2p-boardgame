@@ -1,34 +1,38 @@
 import { MsgType } from './net/protocol';
 import { loadGameClasses } from './lobby/session';
-import { clear, header, question, getchTimeout, readLineWithRefresh, BOLD, RESET, DIM } from './ui/terminal';
-import { renderGame } from './ui/lobby_screen';
+import { BOLD, RESET, DIM, GREEN } from './ui/terminal';
+import { renderGameStr } from './ui/lobby_screen';
 import { t } from './i18n';
 import type { ChatLog } from './chat';
 import type { BaseGame } from '../games/base';
+import type { GamePanel } from './ui/panel';
 
 interface EngineOptions {
   name: string;
   chatLog: ChatLog;
+  panel: GamePanel;
 }
 
 export class GameEngine {
   name: string;
   chatLog: ChatLog;
+  panel: GamePanel;
   sendMove: ((data: unknown) => void) | null = null;
   sendChat: ((text: string) => void) | null = null;
   gameObj: BaseGame | null = null;
   players: string[] = [];
-  private _lastSnap: string | null = null;
 
-  constructor({ name, chatLog }: EngineOptions) {
+  constructor({ name, chatLog, panel }: EngineOptions) {
     this.name = name;
     this.chatLog = chatLog;
+    this.panel = panel;
   }
 
   onMessage(msg: Record<string, unknown>): void {
     const type = msg.type as string;
     if (type === MsgType.CHAT) {
       this.chatLog.add((msg.from as string) || '?', (msg.text as string) || '');
+      this.panel.pushChat((msg.from as string) || '?', (msg.text as string) || '');
     } else if (type === MsgType.PLAYER_LIST) {
       const newPlayers = (msg.players as string[]) || [];
       if (this.gameObj && !this.gameObj._over && this.players.length > newPlayers.length) {
@@ -50,6 +54,7 @@ export class GameEngine {
     } else if (type === MsgType.STATE) {
       if (this.gameObj) {
         this.gameObj.loadState((msg.data as Record<string, unknown>) || {}, this.name);
+        this.panel.setContent(renderGameStr(this.gameObj, this.players, this.chatLog.recent(3), this.name));
       }
     } else if (type === MsgType.GAME_OVER) {
       if (this.gameObj) {
@@ -60,108 +65,74 @@ export class GameEngine {
   }
 
   async run(): Promise<void> {
-    this._lastSnap = null;
     while (true) {
       const gameObj = this.gameObj;
+
       if (!gameObj) {
-        const s = this._snap();
-        if (s !== this._lastSnap) { clear(); header(t('game.waiting')); this._lastSnap = s; }
-        await Bun.sleep(500);
+        this.panel.setContent('\n  Waiting for players...');
+        const k = await this.panel.waitKey(500);
+        if (k === 'q') { this.panel.destroy(); return; }
         continue;
       }
 
-      const s = this._snap();
-      if (s !== this._lastSnap) {
-        clear();
-        renderGame(gameObj, this.players, this.chatLog.recent(3), this.name);
-        this._lastSnap = s;
-      }
+      this.panel.setContent(renderGameStr(gameObj, this.players, this.chatLog.recent(3), this.name));
 
       const [done, winner] = gameObj.isOver();
       if (done) {
-        clear();
-        header(t('game.over'));
         const forfeitedBy = (gameObj as any)._forfeitedBy as string | undefined;
         const endMsg = forfeitedBy
           ? `${forfeitedBy} disconnected. ${winner ? winner + ' wins by forfeit!' : ''}`
           : winner ? t('game.winner', { winner }) : t('game.draw');
-        console.log(`\n  ${BOLD}${endMsg}${RESET}\n`);
-        await question('  ' + t('game.continue'));
+        this.panel.setContent(`\n  ${BOLD}Game Over${RESET}\n\n  ${endMsg}\n\n`);
+        await this.panel.readInput('  Press Enter to exit... ', true);
+        this.panel.destroy();
         return;
       }
 
       if (gameObj.currentTurn() === this.name) {
-        const raw = await readLineWithRefresh(t('game.move_prompt'), () => {
-          const s = this._snap();
-          if (s !== this._lastSnap) {
-            clear();
-            renderGame(gameObj!, this.players, this.chatLog.recent(3), this.name);
-            this._lastSnap = s;
-            return true;
-          }
-          return false;
-        });
-        if (!raw.trim()) { this._lastSnap = null; continue; }
-
+        const raw = await this.panel.readInput(t('game.move_prompt'));
         const cmd = raw.trim().toLowerCase();
-        if (cmd === 'q') { return; }
-        if (cmd === 't') {
-          const msg = await question(t('game.chat_prompt'));
+        if (!cmd) continue;
+        if (cmd === 'q') { this.panel.destroy(); return; }
+        if (cmd === '?') {
+          const lines = ['', `  ${BOLD}? Help${RESET}`, '', ...gameObj.getHelp().map((l: string) => `  ${l}`), '',
+            `  ${DIM}c = send chat   t = toggle chat panel   ? = help   q = quit${RESET}`, ''];
+          this.panel.setContent(lines.join('\n'));
+          await this.panel.readInput('  Press Enter to return... ', true);
+          continue;
+        }
+        if (cmd === 'c') {
+          const msg = await this.panel.readInput(t('game.chat_prompt'), true);
           if (msg.trim() && this.sendChat) {
             this.sendChat(msg.trim());
             await Bun.sleep(60);
           }
-          this._lastSnap = null;
           continue;
         }
-        if (cmd === '?') {
-          this._showHelp(gameObj);
-          await question(t('game.continue'));
-          this._lastSnap = null;
-          continue;
-        }
-
         const parsed = gameObj.parseInput(raw.trim());
         if (!parsed) {
-          console.log(`\n  ${DIM}Unrecognized input — type ? for help${RESET}\n`);
+          this.panel.setPrompt(`  ${DIM}Unrecognized input — type ? for help${RESET}`);
           await Bun.sleep(1200);
-          this._lastSnap = null;
+          this.panel.setPrompt();
           continue;
         }
         if (this.sendMove) this.sendMove(parsed);
-        this._lastSnap = null;
       } else {
-        const ch = await getchTimeout(150);
-        if (ch === 'q') { return; }
-        if (ch === 't') {
-          const msg = await question(t('game.chat_prompt'));
+        const k = await this.panel.waitKey(150);
+        if (k === 'q') { this.panel.destroy(); return; }
+        if (k === 'c') {
+          const msg = await this.panel.readInput(t('game.chat_prompt'), true);
           if (msg.trim() && this.sendChat) {
             this.sendChat(msg.trim());
             await Bun.sleep(60);
           }
-          this._lastSnap = null;
-        } else if (ch === '?') {
-          this._showHelp(gameObj);
-          await question(t('game.continue'));
-          this._lastSnap = null;
+        } else if (k === '?') {
+          const lines = ['', `  ${BOLD}? Help${RESET}`, '', ...gameObj.getHelp().map((l: string) => `  ${l}`), '',
+            `  ${DIM}c = send chat   t = toggle chat panel   ? = help   q = quit${RESET}`, ''];
+          this.panel.setContent(lines.join('\n'));
+          await this.panel.readInput('  Press Enter to return... ', true);
         }
       }
     }
-  }
-
-  private _snap(): string {
-    const g = this.gameObj;
-    if (!g) return '__waiting__';
-    const chats = this.chatLog.recent(3).map((e: any) => `${e.from}:${e.text}`).join('|');
-    return JSON.stringify(g.getState(this.name)) + '|' + chats;
-  }
-
-  private _showHelp(gameObj: BaseGame): void {
-    clear();
-    header('? Help');
-    gameObj.getHelp().forEach(l => console.log(`  ${l}`));
-    console.log();
-    console.log(`  ${DIM}t = chat   ? = this help${RESET}`);
-    console.log();
   }
 }

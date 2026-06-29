@@ -3,10 +3,17 @@
   "version": "1.0.0",
   "description": "CLI P2P Board Game Hub — Node.js client",
   "main": "src/main.js",
-  "bin": { "boardgame": "src/main.js" },
+  "bin": {
+    "boardgame": "src/main.js"
+  },
   "scripts": {
     "start": "node src/main.js",
     "test": "node --test"
   },
-  "engines": { "node": ">=18.0.0" }
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81"
+  }
 }

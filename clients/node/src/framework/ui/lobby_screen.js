@@ -60,6 +60,26 @@ async function promptChat(myName, { question }) {
   return msg.trim() || null;
 }
 
+function renderGameStr(gameObj, players, chatLog, myName) {
+  const lines = [''];
+  lines.push(gameObj.render(myName));
+  lines.push('');
+  lines.push(`  ${DIM}${'─'.repeat(50)}${RESET}`);
+  if (chatLog.length) {
+    lines.push(`  ${BOLD}${t('game.chat_header')}${RESET}`);
+    for (const e of chatLog.slice(-3)) lines.push(`  ${DIM}${e.from}${RESET}: ${e.text}`);
+    lines.push('');
+  }
+  const hint = `${DIM}[c] msg   [t] chat   [?] help   [q] quit${RESET}`;
+  if (gameObj.currentTurn() === myName) {
+    lines.push(`  ${GREEN}${t('game.your_turn')}${RESET}   ${hint}`);
+  } else {
+    lines.push(`  ${DIM}Waiting for ${gameObj.currentTurn()}...${RESET}   ${hint}`);
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
 function renderGame(gameObj, players, chatLog, myName) {
   header(t('game.header'));
   console.log();
@@ -81,4 +101,4 @@ function renderGame(gameObj, players, chatLog, myName) {
   console.log();
 }
 
-module.exports = { showLobby, promptHost, promptJoin, promptChat, renderGame };
+module.exports = { showLobby, promptHost, promptJoin, promptChat, renderGame, renderGameStr };

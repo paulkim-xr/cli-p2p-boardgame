@@ -12,9 +12,11 @@ const { ChatLog } = require('./framework/chat');
 const { clear, header, getch, question, enableAnsiWindows } = require('./framework/ui/terminal');
 const { showLobby, promptHost, promptJoin, promptChat } = require('./framework/ui/lobby_screen');
 const { GameEngine } = require('./framework/engine');
+const { createGamePanel } = require('./framework/ui/panel');
 
 async function runGame(ip, port, name, chatLog) {
-  const engine = new GameEngine({ name, chatLog });
+  const panel = createGamePanel();
+  const engine = new GameEngine({ name, chatLog, panel });
   const clientObj = new Client(ip, port, name, msg => engine.onMessage(msg));
   engine.sendMove = data => clientObj.send({ type: MsgType.MOVE, from: name, data });
   engine.sendChat = text => clientObj.send({ type: MsgType.CHAT, from: name, text });
@@ -22,6 +24,7 @@ async function runGame(ip, port, name, chatLog) {
   await new Promise(r => setTimeout(r, 200));
   await engine.run();
   clientObj.disconnect();
+  clear();
 }
 
 async function main() {

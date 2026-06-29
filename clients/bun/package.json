@@ -8,9 +8,13 @@
     "build:win": "bun build --compile --target=bun-windows-x64 src/main.ts --outfile dist/game-hub.exe"
   },
   "devDependencies": {
+    "@types/blessed": "^0.1.27",
     "@types/bun": "latest"
   },
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81"
   }
 }
